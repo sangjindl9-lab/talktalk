@@ -63,7 +63,7 @@ services:
     region: singapore
     rootDir: admin
     buildCommand: npm ci && npm run build
-    startCommand: node .next/standalone/server.js
+    startCommand: node .next/standalone/admin/server.js
     envVars:
       - key: NODE_ENV
         value: production
