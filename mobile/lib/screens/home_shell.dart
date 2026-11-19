@@ -39,9 +39,21 @@ class _HomeShellState extends State<HomeShell> {
         onDestinationSelected: (value) => setState(() => _index = value),
         indicatorColor: const Color(Brand.primary).withValues(alpha: 0.12),
         destinations: [
-          const NavigationDestination(icon: Icon(Icons.people_outline), selectedIcon: Icon(Icons.people), label: '주변'),
-          const NavigationDestination(icon: Icon(Icons.groups_outlined), selectedIcon: Icon(Icons.groups), label: '모임'),
-          const NavigationDestination(icon: Icon(Icons.storefront_outlined), selectedIcon: Icon(Icons.storefront), label: '동네'),
+          const NavigationDestination(
+            icon: Icon(Icons.people_outline),
+            selectedIcon: Icon(Icons.people),
+            label: '주변',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.groups_outlined),
+            selectedIcon: Icon(Icons.groups),
+            label: '모임',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.storefront_outlined),
+            selectedIcon: Icon(Icons.storefront),
+            label: '동네',
+          ),
           NavigationDestination(
             icon: Badge(
               isLabelVisible: chatBadge > 0,
@@ -55,7 +67,11 @@ class _HomeShellState extends State<HomeShell> {
             ),
             label: '대화',
           ),
-          const NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: '내정보'),
+          const NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: '내정보',
+          ),
         ],
       ),
     );

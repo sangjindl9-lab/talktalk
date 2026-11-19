@@ -21,8 +21,14 @@ class UserAvatar extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text(
-        (nickname == null || nickname!.isEmpty) ? '톡' : nickname!.characters.first,
-        style: TextStyle(fontSize: size * 0.36, fontWeight: FontWeight.w800, color: const Color(Brand.primaryDark)),
+        (nickname == null || nickname!.isEmpty)
+            ? '톡'
+            : nickname!.characters.first,
+        style: TextStyle(
+          fontSize: size * 0.36,
+          fontWeight: FontWeight.w800,
+          color: const Color(Brand.primaryDark),
+        ),
       ),
     );
     if (url == null || url!.isEmpty) return fallback;
@@ -57,7 +63,14 @@ class DistanceChip extends StatelessWidget {
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(label!, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+      child: Text(
+        label!,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
     );
   }
 }
@@ -73,7 +86,10 @@ class SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 18, 4, 8),
       child: Row(
         children: [
-          Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+          ),
           const Spacer(),
           if (trailing != null) trailing!,
         ],
@@ -83,7 +99,13 @@ class SectionTitle extends StatelessWidget {
 }
 
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key, required this.icon, required this.title, this.subtitle, this.action});
+  const EmptyState({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.action,
+  });
   final IconData icon;
   final String title;
   final String? subtitle;
@@ -99,10 +121,17 @@ class EmptyState extends StatelessWidget {
           children: [
             Icon(icon, size: 48, color: Colors.grey.shade400),
             const SizedBox(height: 12),
-            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
             if (subtitle != null) ...[
               const SizedBox(height: 6),
-              Text(subtitle!, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              Text(
+                subtitle!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+              ),
             ],
             if (action != null) ...[const SizedBox(height: 16), action!],
           ],
@@ -136,10 +165,20 @@ class UserListTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      leading: UserAvatar(url: user.photoUrl, nickname: user.nickname, size: 50),
+      leading: UserAvatar(
+        url: user.photoUrl,
+        nickname: user.nickname,
+        size: 50,
+      ),
       title: Row(
         children: [
-          Flexible(child: Text(user.nickname, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700))),
+          Flexible(
+            child: Text(
+              user.nickname,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
           const SizedBox(width: 6),
           DistanceChip(label: user.distanceLabel ?? user.lastActiveLabel),
         ],
@@ -148,9 +187,19 @@ class UserListTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (details.isNotEmpty)
-            Text(details.join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+            Text(
+              details.join(' · '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12),
+            ),
           if (user.bio != null && user.bio!.isNotEmpty)
-            Text(user.bio!, maxLines: subtitleLines, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+            Text(
+              user.bio!,
+              maxLines: subtitleLines,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12),
+            ),
           if (user.interests.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 3),
@@ -169,7 +218,9 @@ class UserListTile extends StatelessWidget {
 }
 
 void showError(BuildContext context, Object error) {
-  final message = error is Exception ? error.toString().replaceFirst('Exception: ', '') : '$error';
+  final message = error is Exception
+      ? error.toString().replaceFirst('Exception: ', '')
+      : '$error';
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
 

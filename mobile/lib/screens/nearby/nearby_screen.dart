@@ -62,7 +62,11 @@ class _NearbyScreenState extends State<NearbyScreen> {
     final result = await showModalBottomSheet<NearbyFilter>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _FilterSheet(initial: state.filter, regions: state.regions, interests: state.interests),
+      builder: (context) => _FilterSheet(
+        initial: state.filter,
+        regions: state.regions,
+        interests: state.interests,
+      ),
     );
     if (result != null) {
       setState(() {});
@@ -79,9 +83,15 @@ class _NearbyScreenState extends State<NearbyScreen> {
     if (_selected.isEmpty) return;
     final state = context.read<AppState>();
     final sent = await Navigator.of(context).push<int>(
-      MaterialPageRoute(builder: (_) => MultiNoteScreen(recipientIds: _selected.toList())),
+      MaterialPageRoute(
+        builder: (_) => MultiNoteScreen(recipientIds: _selected.toList()),
+      ),
     );
-    if (sent != null) setState(() { _selected.clear(); _multiMode = false; });
+    if (sent != null)
+      setState(() {
+        _selected.clear();
+        _multiMode = false;
+      });
     await state.loadNotes();
   }
 
@@ -99,7 +109,10 @@ class _NearbyScreenState extends State<NearbyScreen> {
               _multiMode = !_multiMode;
               _selected.clear();
             }),
-            icon: Icon(_multiMode ? Icons.close : Icons.dynamic_feed_outlined, color: _multiMode ? const Color(Brand.primary) : null),
+            icon: Icon(
+              _multiMode ? Icons.close : Icons.dynamic_feed_outlined,
+              color: _multiMode ? const Color(Brand.primary) : null,
+            ),
           ),
           IconButton(onPressed: _openFilters, icon: const Icon(Icons.tune)),
         ],
@@ -120,23 +133,39 @@ class _NearbyScreenState extends State<NearbyScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('가까운 이웃을 찾으려면 위치가 필요해요', style: TextStyle(fontWeight: FontWeight.w700)),
+                    const Text(
+                      '가까운 이웃을 찾으려면 위치가 필요해요',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       '위치 권한을 허용하면 같은 동네 이웃을 보여드려요. 거절하셔도 시군구를 직접 선택해 이용할 수 있습니다.',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.4),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        height: 1.4,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Expanded(child: FilledButton.tonal(onPressed: _requestLocation, child: const Text('위치 사용하기'))),
+                        Expanded(
+                          child: FilledButton.tonal(
+                            onPressed: _requestLocation,
+                            child: const Text('위치 사용하기'),
+                          ),
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () async {
-                              final picked = await Navigator.of(context).push<Region>(
-                                MaterialPageRoute(builder: (_) => const RegionPickerScreen()),
-                              );
+                              final picked = await Navigator.of(context)
+                                  .push<Region>(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const RegionPickerScreen(),
+                                    ),
+                                  );
                               if (picked != null) {
                                 await state.setRegion(picked.code);
                                 await _refresh();
@@ -166,11 +195,16 @@ class _NearbyScreenState extends State<NearbyScreen> {
                     onSelected: (_) => state.loadNearby(sort: 'recent'),
                   ),
                   const Spacer(),
-                  Text('${state.nearby.length}명', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                  Text(
+                    '${state.nearby.length}명',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
                 ],
               ),
             ),
-            if (state.filter.regionCode != null || state.filter.ageBand != null || state.filter.interest != null)
+            if (state.filter.regionCode != null ||
+                state.filter.ageBand != null ||
+                state.filter.interest != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -178,23 +212,39 @@ class _NearbyScreenState extends State<NearbyScreen> {
                     if (state.browsingRegion != null)
                       Padding(
                         padding: const EdgeInsets.only(right: 6),
-                        child: Chip(label: Text('${state.browsingRegion!['badge'] ?? '이 지역 둘러보는 중'}', style: const TextStyle(fontSize: 11))),
+                        child: Chip(
+                          label: Text(
+                            '${state.browsingRegion!['badge'] ?? '이 지역 둘러보는 중'}',
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                        ),
                       ),
                     Expanded(
                       child: Text(
-                        [state.filter.ageBand, state.filter.interest, state.filter.regionCode]
-                            .whereType<String>()
-                            .map((e) => '#$e')
-                            .join(' '),
-                        style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                        [
+                          state.filter.ageBand,
+                          state.filter.interest,
+                          state.filter.regionCode,
+                        ].whereType<String>().map((e) => '#$e').join(' '),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade600,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     TextButton(
                       onPressed: () {
-                        state.loadNearby(regionCode: '', ageBand: '', interest: '');
+                        state.loadNearby(
+                          regionCode: '',
+                          ageBand: '',
+                          interest: '',
+                        );
                       },
-                      child: const Text('필터 초기화', style: TextStyle(fontSize: 11)),
+                      child: const Text(
+                        '필터 초기화',
+                        style: TextStyle(fontSize: 11),
+                      ),
                     ),
                   ],
                 ),
@@ -203,55 +253,65 @@ class _NearbyScreenState extends State<NearbyScreen> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : state.nearby.isEmpty
-                      ? ListView(
-                          children: const [
-                            SizedBox(height: 60),
-                            EmptyState(
-                              icon: Icons.person_search_outlined,
-                              title: '주변에 표시 중인 이웃이 없어요',
-                              subtitle: '지역을 바꾸거나 잠시 후 다시 확인해 보세요.\n(운영 환경에서는 실제 가입 회원만 표시됩니다)',
-                            ),
-                          ],
-                        )
-                      : ListView.separated(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: state.nearby.length,
-                          separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
-                          itemBuilder: (context, index) {
-                            final user = state.nearby[index];
-                            final selected = _selected.contains(user.id);
-                            return UserListTile(
-                              user: user,
-                              onTap: () {
-                                if (_multiMode) {
-                                  setState(() {
+                  ? ListView(
+                      children: const [
+                        SizedBox(height: 60),
+                        EmptyState(
+                          icon: Icons.person_search_outlined,
+                          title: '주변에 표시 중인 이웃이 없어요',
+                          subtitle: '지역을 바꾸거나 잠시 후 다시 확인해 보세요.\n(운영 환경에서는 실제 가입 회원만 표시됩니다)',
+                        ),
+                      ],
+                    )
+                  : ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: state.nearby.length,
+                      separatorBuilder: (_, __) =>
+                          Divider(height: 1, color: Colors.grey.shade100),
+                      itemBuilder: (context, index) {
+                        final user = state.nearby[index];
+                        final selected = _selected.contains(user.id);
+                        return UserListTile(
+                          user: user,
+                          onTap: () {
+                            if (_multiMode) {
+                              setState(() {
+                                if (selected) {
+                                  _selected.remove(user.id);
+                                } else {
+                                  _selected.add(user.id);
+                                }
+                              });
+                            } else {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => UserProfileScreen(
+                                    userId: user.id,
+                                    fallback: user,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          trailing: _multiMode
+                              ? Checkbox(
+                                  value: selected,
+                                  onChanged: (_) => setState(() {
                                     if (selected) {
                                       _selected.remove(user.id);
                                     } else {
                                       _selected.add(user.id);
                                     }
-                                  });
-                                } else {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => UserProfileScreen(userId: user.id, fallback: user),
-                                  ));
-                                }
-                              },
-                              trailing: _multiMode
-                                  ? Checkbox(value: selected, onChanged: (_) => setState(() {
-                                      if (selected) {
-                                        _selected.remove(user.id);
-                                      } else {
-                                        _selected.add(user.id);
-                                      }
-                                    }))
-                                  : TextButton(
-                                      onPressed: () => showNoteCompose(context, user),
-                                      child: const Text('인사'),
-                                    ),
-                            );
-                          },
-                        ),
+                                  }),
+                                )
+                              : TextButton(
+                                  onPressed: () =>
+                                      showNoteCompose(context, user),
+                                  child: const Text('인사'),
+                                ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -270,7 +330,11 @@ class _NearbyScreenState extends State<NearbyScreen> {
 }
 
 class _FilterSheet extends StatefulWidget {
-  const _FilterSheet({required this.initial, required this.regions, required this.interests});
+  const _FilterSheet({
+    required this.initial,
+    required this.regions,
+    required this.interests,
+  });
   final NearbyFilter initial;
   final List<Region> regions;
   final List<String> interests;
@@ -298,30 +362,47 @@ class _FilterSheetState extends State<_FilterSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('주변 이웃 필터', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            const Text(
+              '주변 이웃 필터',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            ),
             const SizedBox(height: 14),
-            const Text('연령대', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            const Text(
+              '연령대',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 6),
             Wrap(
               spacing: 8,
               children: [
                 for (final band in ['20s', '30s', '40s', '50s', '60s+'])
                   ChoiceChip(
-                    label: Text(band == '60s+' ? '60대+' : '${band.substring(0, 2)}대'),
+                    label: Text(
+                      band == '60s+' ? '60대+' : '${band.substring(0, 2)}대',
+                    ),
                     selected: _filter.ageBand == band,
-                    onSelected: (_) => setState(() => _filter.ageBand = _filter.ageBand == band ? null : band),
+                    onSelected: (_) => setState(
+                      () => _filter.ageBand = _filter.ageBand == band
+                          ? null
+                          : band,
+                    ),
                   ),
               ],
             ),
             const SizedBox(height: 14),
-            const Text('관심사', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            const Text(
+              '관심사',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 6),
             Wrap(
               spacing: 8,
@@ -331,12 +412,19 @@ class _FilterSheetState extends State<_FilterSheet> {
                   ChoiceChip(
                     label: Text(interest),
                     selected: _filter.interest == interest,
-                    onSelected: (_) => setState(() => _filter.interest = _filter.interest == interest ? null : interest),
+                    onSelected: (_) => setState(
+                      () => _filter.interest = _filter.interest == interest
+                          ? null
+                          : interest,
+                    ),
                   ),
               ],
             ),
             const SizedBox(height: 14),
-            const Text('지역', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            const Text(
+              '지역',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 6),
             DropdownButtonFormField<String>(
               initialValue: _regionCode,
@@ -344,7 +432,10 @@ class _FilterSheetState extends State<_FilterSheet> {
               items: [
                 const DropdownMenuItem(value: '', child: Text('내 지역')),
                 for (final region in widget.regions)
-                  DropdownMenuItem(value: region.code, child: Text('${region.city} ${region.name}')),
+                  DropdownMenuItem(
+                    value: region.code,
+                    child: Text('${region.city} ${region.name}'),
+                  ),
               ],
               onChanged: (value) => setState(() => _regionCode = value),
             ),
@@ -356,7 +447,10 @@ class _FilterSheetState extends State<_FilterSheet> {
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () {
-                _filter.regionCode = (_regionCode == null || _regionCode!.isEmpty) ? null : _regionCode;
+                _filter.regionCode =
+                    (_regionCode == null || _regionCode!.isEmpty)
+                    ? null
+                    : _regionCode;
                 Navigator.of(context).pop(_filter);
               },
               child: const Text('필터 적용'),

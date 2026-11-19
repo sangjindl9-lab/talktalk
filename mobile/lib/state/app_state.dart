@@ -18,7 +18,12 @@ class NearbyFilter {
   String? regionCode;
   String? ageBand;
   String? interest;
-  NearbyFilter({this.sort = 'distance', this.regionCode, this.ageBand, this.interest});
+  NearbyFilter({
+    this.sort = 'distance',
+    this.regionCode,
+    this.ageBand,
+    this.interest,
+  });
 }
 
 /// 앱 전역 상태: 인증, 주변 친구, 쪽지, 대화, 커뮤니티, 포인트.
@@ -63,8 +68,10 @@ class AppState extends ChangeNotifier {
   List<Map<String, dynamic>> promotions = [];
   List<Map<String, dynamic>> blockedUsers = [];
 
-  int get newRequestCount => receivedNotes.where((n) => n.status == 'PENDING').length;
-  int get unreadMessageCount => unreadByRoom.values.fold(0, (sum, value) => sum + value);
+  int get newRequestCount =>
+      receivedNotes.where((n) => n.status == 'PENDING').length;
+  int get unreadMessageCount =>
+      unreadByRoom.values.fold(0, (sum, value) => sum + value);
 
   // ───────────────────────────── 초기화 / 인증 ─────────────────────────────
 
@@ -93,7 +100,10 @@ class AppState extends ChangeNotifier {
   }
 
   Future<String> verifyPhoneCode(String phone, String code) async {
-    final res = await api.post('/auth/phone/verify', body: {'phone': phone, 'code': code});
+    final res = await api.post(
+      '/auth/phone/verify',
+      body: {'phone': phone, 'code': code},
+    );
     return '${res['verificationToken']}';
   }
 
@@ -109,23 +119,29 @@ class AppState extends ChangeNotifier {
     bool genderVisible = false,
     String? photoMediaId,
   }) async {
-    final res = await api.post('/auth/signup', body: {
-      'verificationToken': verificationToken,
-      'nickname': nickname,
-      'realName': realName,
-      'birthDate': birthDate.toIso8601String().substring(0, 10),
-      'regionCode': regionCode,
-      'interests': interests,
-      'bio': bio,
-      'gender': gender ?? 'NONE',
-      'genderVisible': genderVisible,
-      'photoMediaId': photoMediaId,
-    });
+    final res = await api.post(
+      '/auth/signup',
+      body: {
+        'verificationToken': verificationToken,
+        'nickname': nickname,
+        'realName': realName,
+        'birthDate': birthDate.toIso8601String().substring(0, 10),
+        'regionCode': regionCode,
+        'interests': interests,
+        'bio': bio,
+        'gender': gender ?? 'NONE',
+        'genderVisible': genderVisible,
+        'photoMediaId': photoMediaId,
+      },
+    );
     await _applySession(res as Map<String, dynamic>);
   }
 
   Future<void> login(String phone, String code) async {
-    final res = await api.post('/auth/login', body: {'phone': phone, 'code': code});
+    final res = await api.post(
+      '/auth/login',
+      body: {'phone': phone, 'code': code},
+    );
     await _applySession(res as Map<String, dynamic>);
   }
 
@@ -186,7 +202,9 @@ class AppState extends ChangeNotifier {
   Future<void> loadRegions() async {
     if (regions.isNotEmpty) return;
     final res = await api.get('/regions') as List;
-    regions = res.map((e) => Region.fromJson(e as Map<String, dynamic>)).toList();
+    regions = res
+        .map((e) => Region.fromJson(e as Map<String, dynamic>))
+        .toList();
     notifyListeners();
   }
 
@@ -206,14 +224,24 @@ class AppState extends ChangeNotifier {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
       return null;
     }
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.low,
-      timeLimit: const Duration(seconds: 12),
-    ).catchError((_) => Geolocator.getLastKnownPosition().then((p) => p!));
-    final res = await api.post('/me/location', body: {'lat': position.latitude, 'lng': position.longitude});
+    Position? position;
+    try {
+      position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+        timeLimit: const Duration(seconds: 12),
+      );
+    } catch (_) {
+      position = await Geolocator.getLastKnownPosition();
+    }
+    if (position == null) return null;
+    final res = await api.post(
+      '/me/location',
+      body: {'lat': position.latitude, 'lng': position.longitude},
+    );
     final region = Region.fromJson(res as Map<String, dynamic>);
     await refreshMe();
     return region;
@@ -225,7 +253,10 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> browseRegion(String regionCode) async {
-    final res = await api.post('/regions/browse', body: {'regionCode': regionCode});
+    final res = await api.post(
+      '/regions/browse',
+      body: {'regionCode': regionCode},
+    );
     browsingRegion = res as Map<String, dynamic>;
     points = (res['balance'] as num?)?.toInt() ?? points;
     await loadNearby(regionCode: regionCode);
@@ -234,18 +265,28 @@ class AppState extends ChangeNotifier {
 
   // ───────────────────────────── 주변 친구 ─────────────────────────────
 
-  Future<void> loadNearby({String? sort, String? regionCode, String? ageBand, String? interest}) async {
+  Future<void> loadNearby({
+    String? sort,
+    String? regionCode,
+    String? ageBand,
+    String? interest,
+  }) async {
     if (sort != null) filter.sort = sort;
     if (regionCode != null) filter.regionCode = regionCode;
     if (ageBand != null) filter.ageBand = ageBand;
     if (interest != null) filter.interest = interest;
-    final res = await api.get('/nearby', query: {
-      'sort': filter.sort,
-      'regionCode': filter.regionCode,
-      'ageBand': filter.ageBand,
-      'interest': filter.interest,
-    }) as List;
-    nearby = res.map((e) => AppUser.fromJson(e as Map<String, dynamic>)).toList();
+    final res = await api.get(
+      '/nearby',
+      query: {
+        'sort': filter.sort,
+        'regionCode': filter.regionCode,
+        'ageBand': filter.ageBand,
+        'interest': filter.interest,
+      },
+    ) as List;
+    nearby = res
+        .map((e) => AppUser.fromJson(e as Map<String, dynamic>))
+        .toList();
     notifyListeners();
   }
 
@@ -281,7 +322,10 @@ class AppState extends ChangeNotifier {
   // ───────────────────────────── 쪽지(인사) ─────────────────────────────
 
   Future<NoteRequestItem> sendNote(String toUserId, String message) async {
-    final res = await api.post('/notes/requests', body: {'toUserId': toUserId, 'message': message});
+    final res = await api.post(
+      '/notes/requests',
+      body: {'toUserId': toUserId, 'message': message},
+    );
     final note = NoteRequestItem.fromJson(res as Map<String, dynamic>);
     sentNotes.insert(0, note);
     notifyListeners();
@@ -289,10 +333,16 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> loadNotes() async {
-    final received = await api.get('/notes/requests', query: {'box': 'received'}) as List;
-    final sent = await api.get('/notes/requests', query: {'box': 'sent'}) as List;
-    receivedNotes = received.map((e) => NoteRequestItem.fromJson(e as Map<String, dynamic>)).toList();
-    sentNotes = sent.map((e) => NoteRequestItem.fromJson(e as Map<String, dynamic>)).toList();
+    final received =
+        await api.get('/notes/requests', query: {'box': 'received'}) as List;
+    final sent =
+        await api.get('/notes/requests', query: {'box': 'sent'}) as List;
+    receivedNotes = received
+        .map((e) => NoteRequestItem.fromJson(e as Map<String, dynamic>))
+        .toList();
+    sentNotes = sent
+        .map((e) => NoteRequestItem.fromJson(e as Map<String, dynamic>))
+        .toList();
     notifyListeners();
   }
 
@@ -315,12 +365,21 @@ class AppState extends ChangeNotifier {
   }
 
   Future<Map<String, dynamic>> multiNotePreview(List<String> toUserIds) async {
-    final res = await api.post('/notes/multi/preview', body: {'toUserIds': toUserIds});
+    final res = await api.post(
+      '/notes/multi/preview',
+      body: {'toUserIds': toUserIds},
+    );
     return Map<String, dynamic>.from(res as Map);
   }
 
-  Future<Map<String, dynamic>> sendMultiNote(List<String> toUserIds, String message) async {
-    final res = await api.post('/notes/multi', body: {'toUserIds': toUserIds, 'message': message});
+  Future<Map<String, dynamic>> sendMultiNote(
+    List<String> toUserIds,
+    String message,
+  ) async {
+    final res = await api.post(
+      '/notes/multi',
+      body: {'toUserIds': toUserIds, 'message': message},
+    );
     points = ((res as Map)['balance'] as num?)?.toInt() ?? points;
     await loadNotes();
     notifyListeners();
@@ -331,7 +390,9 @@ class AppState extends ChangeNotifier {
 
   Future<void> loadChats() async {
     final res = await api.get('/chat/rooms') as List;
-    chats = res.map((e) => ChatSummary.fromJson(e as Map<String, dynamic>)).toList();
+    chats = res
+        .map((e) => ChatSummary.fromJson(e as Map<String, dynamic>))
+        .toList();
     unreadByRoom = {
       for (final chat in chats)
         if (chat.unreadCount > 0) chat.id: chat.unreadCount,
@@ -346,26 +407,39 @@ class AppState extends ChangeNotifier {
 
   Future<void> openRoom(String roomId) async {
     activeRoomId = roomId;
-    final res = await api.get('/chat/rooms/$roomId/messages', query: {'limit': 50}) as List;
-    final loaded = res.map((e) => ChatMessage.fromJson(e as Map<String, dynamic>)).toList();
+    final res = await api.get(
+      '/chat/rooms/$roomId/messages',
+      query: {'limit': 50},
+    ) as List;
+    final loaded = res
+        .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))
+        .toList();
     // 오프라인 큐에 남은 메시지를 함께 표시
-    final queued = (await offlineQueue.all()).where((e) => e['roomId'] == roomId);
+    final queued = (await offlineQueue.all()).where(
+      (e) => e['roomId'] == roomId,
+    );
     for (final entry in queued) {
-      loaded.add(ChatMessage(
-        id: 'local-${entry['clientMessageId']}',
-        roomId: roomId,
-        senderId: me?.id ?? '',
-        senderNickname: me?.nickname ?? '나',
-        type: '${entry['type'] ?? 'TEXT'}',
-        body: entry['body'] as String?,
-        clientMessageId: '${entry['clientMessageId']}',
-        createdAt: DateTime.tryParse('${entry['createdAt']}') ?? DateTime.now(),
-        state: 'pending',
-      ));
+      loaded.add(
+        ChatMessage(
+          id: 'local-${entry['clientMessageId']}',
+          roomId: roomId,
+          senderId: me?.id ?? '',
+          senderNickname: me?.nickname ?? '나',
+          type: '${entry['type'] ?? 'TEXT'}',
+          body: entry['body'] as String?,
+          clientMessageId: '${entry['clientMessageId']}',
+          createdAt:
+              DateTime.tryParse('${entry['createdAt']}') ?? DateTime.now(),
+          state: 'pending',
+        ),
+      );
     }
     loaded.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     messagesByRoom[roomId] = loaded;
-    lastSeqByRoom[roomId] = loaded.fold(0, (max, m) => m.seq > max ? m.seq : max);
+    lastSeqByRoom[roomId] = loaded.fold(
+      0,
+      (max, m) => m.seq > max ? m.seq : max,
+    );
     await ws.join(roomId);
     await markRead(roomId);
     notifyListeners();
@@ -403,7 +477,8 @@ class AppState extends ChangeNotifier {
 
   /// 메시지 전송: 낙관적 표시 → 실패 시 오프라인 큐에 보관.
   Future<void> sendText(String roomId, String text) async {
-    final clientMessageId = 'c-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(9999)}';
+    final clientMessageId =
+        'c-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(9999)}';
     final local = ChatMessage(
       id: 'local-$clientMessageId',
       roomId: roomId,
@@ -418,9 +493,15 @@ class AppState extends ChangeNotifier {
     messagesByRoom.putIfAbsent(roomId, () => []).add(local);
     notifyListeners();
 
-    final ack = await ws.sendMessage(roomId: roomId, clientMessageId: clientMessageId, body: text);
+    final ack = await ws.sendMessage(
+      roomId: roomId,
+      clientMessageId: clientMessageId,
+      body: text,
+    );
     if (ack['ok'] == true) {
-      final message = ChatMessage.fromJson(Map<String, dynamic>.from(ack['message'] as Map));
+      final message = ChatMessage.fromJson(
+        Map<String, dynamic>.from(ack['message'] as Map),
+      );
       _replaceLocal(roomId, clientMessageId, message);
     } else {
       final code = '${(ack['error'] as Map?)?['code']}';
@@ -435,7 +516,11 @@ class AppState extends ChangeNotifier {
         _setState(roomId, clientMessageId, 'failed');
       } else {
         _setState(roomId, clientMessageId, 'failed');
-        throw ApiException(0, code, '${(ack['error'] as Map?)?['message'] ?? '메시지를 보내지 못했습니다.'}');
+        throw ApiException(
+          0,
+          code,
+          '${(ack['error'] as Map?)?['message'] ?? '메시지를 보내지 못했습니다.'}',
+        );
       }
     }
     await loadChats();
@@ -445,16 +530,27 @@ class AppState extends ChangeNotifier {
     final uploaded = await api.uploadImage(file, kind: 'CHAT');
     final mediaId = '${uploaded['id']}';
     final clientMessageId = 'i-${DateTime.now().microsecondsSinceEpoch}';
-    final ack = await ws.sendMessage(roomId: roomId, clientMessageId: clientMessageId, type: 'IMAGE', mediaId: mediaId);
+    final ack = await ws.sendMessage(
+      roomId: roomId,
+      clientMessageId: clientMessageId,
+      type: 'IMAGE',
+      mediaId: mediaId,
+    );
     if (ack['ok'] == true) {
-      final message = ChatMessage.fromJson(Map<String, dynamic>.from(ack['message'] as Map));
+      final message = ChatMessage.fromJson(
+        Map<String, dynamic>.from(ack['message'] as Map),
+      );
       messagesByRoom.putIfAbsent(roomId, () => []).add(message);
       notifyListeners();
     }
     await loadChats();
   }
 
-  void _replaceLocal(String roomId, String clientMessageId, ChatMessage message) {
+  void _replaceLocal(
+    String roomId,
+    String clientMessageId,
+    ChatMessage message,
+  ) {
     final list = messagesByRoom[roomId];
     if (list == null) return;
     final index = list.indexWhere((m) => m.clientMessageId == clientMessageId);
@@ -506,8 +602,14 @@ class AppState extends ChangeNotifier {
         body: entry['body'] as String?,
       );
       if (ack['ok'] == true) {
-        final message = ChatMessage.fromJson(Map<String, dynamic>.from(ack['message'] as Map));
-        _replaceLocal('${entry['roomId']}', '${entry['clientMessageId']}', message);
+        final message = ChatMessage.fromJson(
+          Map<String, dynamic>.from(ack['message'] as Map),
+        );
+        _replaceLocal(
+          '${entry['roomId']}',
+          '${entry['clientMessageId']}',
+          message,
+        );
         await offlineQueue.remove('${entry['clientMessageId']}');
       }
     }
@@ -530,15 +632,25 @@ class AppState extends ChangeNotifier {
   }
 
   Future<List<ChatMessage>> searchRoom(String roomId, String query) async {
-    final res = await api.get('/chat/rooms/$roomId/search', query: {'q': query}) as List;
-    return res.map((e) => ChatMessage.fromJson(e as Map<String, dynamic>)).toList();
+    final res = await api.get(
+      '/chat/rooms/$roomId/search',
+      query: {'q': query},
+    ) as List;
+    return res
+        .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   // ───────────────────────────── 커뮤니티 방 ─────────────────────────────
 
   Future<void> loadRooms({String? q, String? type, bool mine = false}) async {
-    final res = await api.get('/rooms', query: {'q': q, 'type': type, 'mine': mine ? 'true' : null}) as List;
-    rooms = res.map((e) => CommunityRoom.fromJson(e as Map<String, dynamic>)).toList();
+    final res = await api.get(
+      '/rooms',
+      query: {'q': q, 'type': type, 'mine': mine ? 'true' : null},
+    ) as List;
+    rooms = res
+        .map((e) => CommunityRoom.fromJson(e as Map<String, dynamic>))
+        .toList();
     notifyListeners();
   }
 
@@ -547,8 +659,14 @@ class AppState extends ChangeNotifier {
     return Map<String, dynamic>.from(res as Map);
   }
 
-  Future<Map<String, dynamic>> joinCommunityRoom(String roomId, {String? message}) async {
-    final res = await api.post('/rooms/$roomId/join', body: {'message': message});
+  Future<Map<String, dynamic>> joinCommunityRoom(
+    String roomId, {
+    String? message,
+  }) async {
+    final res = await api.post(
+      '/rooms/$roomId/join',
+      body: {'message': message},
+    );
     await loadRooms();
     return Map<String, dynamic>.from(res as Map);
   }
@@ -573,33 +691,54 @@ class AppState extends ChangeNotifier {
       final uploaded = await api.uploadImage(image, kind: 'ROOM');
       imageMediaId = '${uploaded['id']}';
     }
-    final res = await api.post('/rooms', body: {
-      'title': title,
-      'description': description,
-      'hashtags': hashtags,
-      'capacity': capacity,
-      'joinApproval': joinApproval,
-      'regionCode': regionCode,
-      'imageMediaId': imageMediaId,
-    });
+    final res = await api.post(
+      '/rooms',
+      body: {
+        'title': title,
+        'description': description,
+        'hashtags': hashtags,
+        'capacity': capacity,
+        'joinApproval': joinApproval,
+        'regionCode': regionCode,
+        'imageMediaId': imageMediaId,
+      },
+    );
     await loadRooms();
     return CommunityRoom.fromJson(res as Map<String, dynamic>);
   }
 
-  Future<void> leaveCommunityRoom(String roomId, {String? transferToUserId}) async {
-    await api.post('/rooms/$roomId/leave', body: {'transferToUserId': transferToUserId});
+  Future<void> leaveCommunityRoom(
+    String roomId, {
+    String? transferToUserId,
+  }) async {
+    await api.post(
+      '/rooms/$roomId/leave',
+      body: {'transferToUserId': transferToUserId},
+    );
     await loadRooms();
   }
 
-  Future<void> kickMember(String roomId, String userId, {bool restrictRejoin = false}) async {
-    await api.post('/rooms/$roomId/kick', body: {'userId': userId, 'restrictRejoin': restrictRejoin});
+  Future<void> kickMember(
+    String roomId,
+    String userId, {
+    bool restrictRejoin = false,
+  }) async {
+    await api.post(
+      '/rooms/$roomId/kick',
+      body: {'userId': userId, 'restrictRejoin': restrictRejoin},
+    );
   }
 
   // ───────────────────────────── 동네 게시판 / 장터 ─────────────────────────────
 
   Future<void> loadPosts({String? regionCode, String? category}) async {
-    final res = await api.get('/board/posts', query: {'regionCode': regionCode, 'category': category}) as List;
-    posts = res.map((e) => BoardPost.fromJson(e as Map<String, dynamic>)).toList();
+    final res = await api.get(
+      '/board/posts',
+      query: {'regionCode': regionCode, 'category': category},
+    ) as List;
+    posts = res
+        .map((e) => BoardPost.fromJson(e as Map<String, dynamic>))
+        .toList();
     notifyListeners();
   }
 
@@ -614,12 +753,15 @@ class AppState extends ChangeNotifier {
       final uploaded = await api.uploadImage(photo, kind: 'BOARD');
       photoMediaId = '${uploaded['id']}';
     }
-    final res = await api.post('/board/posts', body: {
-      'title': title,
-      'body': body,
-      'category': category,
-      'photoMediaId': photoMediaId,
-    });
+    final res = await api.post(
+      '/board/posts',
+      body: {
+        'title': title,
+        'body': body,
+        'category': category,
+        'photoMediaId': photoMediaId,
+      },
+    );
     await loadPosts(regionCode: me?.regionCode);
     return BoardPost.fromJson(res as Map<String, dynamic>);
   }
@@ -635,14 +777,22 @@ class AppState extends ChangeNotifier {
   }
 
   Future<Map<String, dynamic>> promotePost(String postId, int days) async {
-    final res = await api.post('/board/posts/$postId/promote', body: {'days': days});
+    final res = await api.post(
+      '/board/posts/$postId/promote',
+      body: {'days': days},
+    );
     await refreshMe();
     return Map<String, dynamic>.from(res as Map);
   }
 
   Future<void> loadMarket({String? regionCode, String? type}) async {
-    final res = await api.get('/market/items', query: {'regionCode': regionCode, 'type': type}) as List;
-    marketItems = res.map((e) => MarketItem.fromJson(e as Map<String, dynamic>)).toList();
+    final res = await api.get(
+      '/market/items',
+      query: {'regionCode': regionCode, 'type': type},
+    ) as List;
+    marketItems = res
+        .map((e) => MarketItem.fromJson(e as Map<String, dynamic>))
+        .toList();
     notifyListeners();
   }
 
@@ -658,13 +808,16 @@ class AppState extends ChangeNotifier {
       final uploaded = await api.uploadImage(photo, kind: 'MARKET');
       photoMediaId = '${uploaded['id']}';
     }
-    final res = await api.post('/market/items', body: {
-      'title': title,
-      'description': description,
-      'price': price,
-      'type': type,
-      'photoMediaId': photoMediaId,
-    });
+    final res = await api.post(
+      '/market/items',
+      body: {
+        'title': title,
+        'description': description,
+        'price': price,
+        'type': type,
+        'photoMediaId': photoMediaId,
+      },
+    );
     await loadMarket(regionCode: me?.regionCode);
     return MarketItem.fromJson(res as Map<String, dynamic>);
   }
@@ -686,9 +839,13 @@ class AppState extends ChangeNotifier {
     final balance = await api.get('/points/balance');
     points = ((balance as Map)['balance'] as num?)?.toInt() ?? 0;
     final productsRes = await api.get('/points/products') as Map;
-    products = (productsRes['products'] as List).map((e) => PointProduct.fromJson(e as Map<String, dynamic>)).toList();
+    products = (productsRes['products'] as List)
+        .map((e) => PointProduct.fromJson(e as Map<String, dynamic>))
+        .toList();
     final promos = await api.get('/board/promotions') as List;
-    promotions = promos.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    promotions = promos
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList();
     notifyListeners();
   }
 
@@ -700,33 +857,50 @@ class AppState extends ChangeNotifier {
     String? purchaseToken,
     String? receipt,
   }) async {
-    final res = await api.post('/billing/verify', body: {
-      'platform': platform,
-      'productId': productId,
-      'transactionId': transactionId,
-      'purchaseToken': purchaseToken,
-      'receipt': receipt,
-    });
+    final res = await api.post(
+      '/billing/verify',
+      body: {
+        'platform': platform,
+        'productId': productId,
+        'transactionId': transactionId,
+        'purchaseToken': purchaseToken,
+        'receipt': receipt,
+      },
+    );
     await refreshMe();
     return Map<String, dynamic>.from(res as Map);
   }
 
   // ───────────────────────────── 신고 / 문의 / 공지 ─────────────────────────────
 
-  Future<void> report({required String targetType, required String targetId, required String reason, String? detail}) async {
-    await api.post('/reports', body: {
-      'targetType': targetType,
-      'targetId': targetId,
-      'reason': reason,
-      'detail': detail,
-    });
+  Future<void> report({
+    required String targetType,
+    required String targetId,
+    required String reason,
+    String? detail,
+  }) async {
+    await api.post(
+      '/reports',
+      body: {
+        'targetType': targetType,
+        'targetId': targetId,
+        'reason': reason,
+        'detail': detail,
+      },
+    );
   }
 
   Future<void> appeal(String message, {String? reportId}) async {
-    await api.post('/appeals', body: {'message': message, 'reportId': reportId});
+    await api.post(
+      '/appeals',
+      body: {'message': message, 'reportId': reportId},
+    );
   }
 
-  Future<void> sendInquiry({required String title, required String body}) async {
+  Future<void> sendInquiry({
+    required String title,
+    required String body,
+  }) async {
     await api.post('/inquiries', body: {'title': title, 'body': body});
   }
 
@@ -752,12 +926,17 @@ class AppState extends ChangeNotifier {
       final list = messagesByRoom[message.roomId]!;
       if (list.any((m) => m.id == message.id)) return;
       list.add(message);
-      lastSeqByRoom[message.roomId] = max(lastSeqByRoom[message.roomId] ?? 0, message.seq);
+      lastSeqByRoom[message.roomId] = max(
+        lastSeqByRoom[message.roomId] ?? 0,
+        message.seq,
+      );
       if (activeRoomId == message.roomId) {
         markRead(message.roomId);
       } else if (message.senderId != me?.id) {
         unreadByRoom[message.roomId] = (unreadByRoom[message.roomId] ?? 0) + 1;
-        final preview = me?.setting('pushPreview') == true ? (message.body ?? '사진을 보냈습니다.') : '새 메시지가 도착했습니다.';
+        final preview = me?.setting('pushPreview') == true
+            ? (message.body ?? '사진을 보냈습니다.')
+            : '새 메시지가 도착했습니다.';
         notifications.show(message.senderNickname, preview);
       }
       list.sort((a, b) => a.createdAt.compareTo(b.createdAt));

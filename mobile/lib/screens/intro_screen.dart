@@ -27,18 +27,34 @@ class IntroScreen extends StatelessWidget {
                     color: const Color(Brand.primary),
                     borderRadius: BorderRadius.circular(26),
                     boxShadow: [
-                      BoxShadow(color: const Color(Brand.primary).withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 10)),
+                      BoxShadow(
+                        color: const Color(Brand.primary)
+                            .withValues(alpha: 0.3),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                      ),
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: const Text('톡', style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: Colors.white)),
+                  child: const Text(
+                    '톡',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 22),
               Center(
                 child: Text(
                   Brand.nameKo,
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.8),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.8,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -49,13 +65,27 @@ class IntroScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 36),
-              const _Feature(icon: Icons.waving_hand_outlined, title: '가볍게 인사', body: '동네 이웃에게 짧은 인사 한 줄을 보내 보세요.'),
-              const _Feature(icon: Icons.place_outlined, title: '가까운 이웃', body: '같은 동네·가까운 지역 이웃만 만나요. 정확한 위치는 보여주지 않아요.'),
-              const _Feature(icon: Icons.forum_outlined, title: '안전한 대화', body: '서로 수락하면 1:1 대화가 열려요. 신고·차단은 언제든 가능합니다.'),
+              const _Feature(
+                icon: Icons.waving_hand_outlined,
+                title: '가볍게 인사',
+                body: '동네 이웃에게 짧은 인사 한 줄을 보내 보세요.',
+              ),
+              const _Feature(
+                icon: Icons.place_outlined,
+                title: '가까운 이웃',
+                body: '같은 동네·가까운 지역 이웃만 만나요. 정확한 위치는 보여주지 않아요.',
+              ),
+              const _Feature(
+                icon: Icons.forum_outlined,
+                title: '안전한 대화',
+                body: '서로 수락하면 1:1 대화가 열려요. 신고·차단은 언제든 가능합니다.',
+              ),
               const Spacer(),
               FilledButton(
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PhoneAuthScreen()));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const PhoneAuthScreen()),
+                  );
                 },
                 child: const Text('시작하기'),
               ),
@@ -63,7 +93,11 @@ class IntroScreen extends StatelessWidget {
               Center(
                 child: TextButton(
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PhoneAuthScreen(isLogin: true)));
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const PhoneAuthScreen(isLogin: true),
+                      ),
+                    );
                   },
                   child: const Text('이미 계정이 있어요'),
                 ),
@@ -73,13 +107,20 @@ class IntroScreen extends StatelessWidget {
                 child: Text(
                   '만 ${Brand.minimumAge}세 이상 본인확인 회원만 이용할 수 있어요.\n가입 시 약관 및 개인정보 처리방침에 동의하게 됩니다.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600, height: 1.5),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade600,
+                    height: 1.5,
+                  ),
                 ),
               ),
               if (state.lastError != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
-                  child: Text(state.lastError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                  child: Text(
+                    state.lastError!,
+                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                  ),
                 ),
               const SizedBox(height: 16),
             ],
@@ -118,9 +159,22 @@ class _Feature extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(body, style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700, height: 1.4)),
+                Text(
+                  body,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: Colors.grey.shade700,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),

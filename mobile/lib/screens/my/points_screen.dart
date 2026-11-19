@@ -51,11 +51,16 @@ class _PointsScreenState extends State<PointsScreen> {
       final ids = state.products.map((p) => p.productId).toSet();
       if (ids.isEmpty) return;
       final response = await _iap.queryProductDetails(ids);
-      _storeProducts = {for (final product in response.productDetails) product.id: product};
+      _storeProducts = {
+        for (final product in response.productDetails) product.id: product,
+      };
       _subscription?.cancel();
-      _subscription = _iap.purchaseStream.listen(_onPurchase, onError: (error) {
-        if (mounted) showInfo(context, '스토어 결제 오류: $error');
-      });
+      _subscription = _iap.purchaseStream.listen(
+        _onPurchase,
+        onError: (error) {
+          if (mounted) showInfo(context, '스토어 결제 오류: $error');
+        },
+      );
       if (mounted) setState(() {});
     } catch (_) {
       _storeReady = false;
@@ -67,7 +72,8 @@ class _PointsScreenState extends State<PointsScreen> {
     for (final purchase in purchases) {
       if (purchase.status == PurchaseStatus.pending) continue;
       if (purchase.status == PurchaseStatus.error) {
-        if (mounted) showInfo(context, '결제가 완료되지 않았습니다: ${purchase.error?.message ?? ''}');
+        if (mounted)
+          showInfo(context, '결제가 완료되지 않았습니다: ${purchase.error?.message ?? ''}');
         continue;
       }
       try {
@@ -78,9 +84,15 @@ class _PointsScreenState extends State<PointsScreen> {
           purchaseToken: purchase.verificationData.serverVerificationData,
         );
         if (mounted) {
-          showInfo(context, result['duplicate'] == true ? '이미 처리된 영수증입니다.' : '포인트가 충전되었습니다. (${result['points']}P)');
+          showInfo(
+            context,
+            result['duplicate'] == true
+                ? '이미 처리된 영수증입니다.'
+                : '포인트가 충전되었습니다. (${result['points']}P)',
+          );
         }
-        if (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) {
+        if (purchase.status == PurchaseStatus.purchased ||
+            purchase.status == PurchaseStatus.restored) {
           await _iap.completePurchase(purchase);
         }
       } catch (e) {
@@ -123,15 +135,27 @@ class _PointsScreenState extends State<PointsScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(Brand.primary), Color(Brand.primaryDark)]),
+              gradient: const LinearGradient(
+                colors: [Color(Brand.primary), Color(Brand.primaryDark)],
+              ),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('보유 포인트', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                const Text(
+                  '보유 포인트',
+                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                ),
                 const SizedBox(height: 6),
-                Text('${state.points}P', style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
+                Text(
+                  '${state.points}P',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 const Text(
                   '기본 1:1 인사·신고·차단은 무료예요.',
@@ -144,45 +168,85 @@ class _PointsScreenState extends State<PointsScreen> {
           if (!_storeReady)
             Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: const Color(0xFFFFF3E0), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF3E0),
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: const Text(
                 '스토어 상품 정보를 불러오는 중이거나 스토어를 사용할 수 없습니다.\n'
                 'Google Play / App Store에 상품이 등록된 후 결제가 가능합니다.',
-                style: TextStyle(fontSize: 12, color: Color(0xFF8A5A10), height: 1.5),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF8A5A10),
+                  height: 1.5,
+                ),
               ),
             ),
           for (final product in state.products)
             Container(
               margin: const EdgeInsets.only(bottom: 8),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
               child: ListTile(
-                title: Text(product.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                title: Text(
+                  product.title,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
                 subtitle: Text(
-                  product.type == 'SUBSCRIPTION' ? '월 구독 · 매월 ${product.points}P 지급' : '${product.points}P',
+                  product.type == 'SUBSCRIPTION'
+                      ? '월 구독 · 매월 ${product.points}P 지급'
+                      : '${product.points}P',
                   style: const TextStyle(fontSize: 12),
                 ),
                 trailing: FilledButton.tonal(
                   onPressed: _loading ? null : () => _buy(product),
-                  child: Text('${product.amount.toString()}원', style: const TextStyle(fontSize: 12)),
+                  child: Text(
+                    '${product.amount.toString()}원',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ),
               ),
             ),
           const SectionTitle('상단 고정 이용 내역'),
           if (state.promotions.isEmpty)
-            Text('이용 내역이 없습니다.', style: TextStyle(fontSize: 12, color: Colors.grey.shade600))
+            Text(
+              '이용 내역이 없습니다.',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            )
           else
-            ...state.promotions.map((promo) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text('${promo['targetType']} 상단 고정 ${promo['days']}일', style: const TextStyle(fontSize: 13)),
-                  subtitle: Text('${promo['status']} · ${promo['pointCost']}P', style: const TextStyle(fontSize: 11)),
-                  trailing: Text('${promo['endsAt'] ?? ''}'.replaceAll('T', ' ').split('.').first, style: const TextStyle(fontSize: 10)),
-                )),
+            ...state.promotions.map(
+              (promo) => ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  '${promo['targetType']} 상단 고정 ${promo['days']}일',
+                  style: const TextStyle(fontSize: 13),
+                ),
+                subtitle: Text(
+                  '${promo['status']} · ${promo['pointCost']}P',
+                  style: const TextStyle(fontSize: 11),
+                ),
+                trailing: Text(
+                  '${promo['endsAt'] ?? ''}'
+                      .replaceAll('T', ' ')
+                      .split('.')
+                      .first,
+                  style: const TextStyle(fontSize: 10),
+                ),
+              ),
+            ),
           const SizedBox(height: 16),
           Text(
             '결제 영수증은 서버에서 Google Play / App Store에 검증하며, 동일 영수증은 중복 지급되지 않습니다.\n'
             '환불은 고객센터 문의를 통해 처리됩니다.',
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade600, height: 1.5),
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey.shade600,
+              height: 1.5,
+            ),
           ),
         ],
       ),

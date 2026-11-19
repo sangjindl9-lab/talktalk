@@ -37,9 +37,13 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       _interests.addAll(me.interests);
       _ageBand = me.ageBand ?? '20s';
       _gender = me.gender ?? 'NONE';
-      _genderVisible = me.setting('genderVisible', fallback: false);
+      _genderVisible = me.genderVisible;
       if (me.regionCode != null) {
-        _region = Region(code: me.regionCode!, name: me.regionName ?? '', city: '');
+        _region = Region(
+          code: me.regionCode!,
+          name: me.regionName ?? '',
+          city: '',
+        );
       }
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -94,36 +98,80 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           Center(
             child: GestureDetector(
               onTap: () async {
-                final file = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1200);
+                final file = await ImagePicker().pickImage(
+                  source: ImageSource.gallery,
+                  maxWidth: 1200,
+                );
                 if (file != null) setState(() => _photo = File(file.path));
               },
               child: _photo != null
-                  ? ClipRRect(borderRadius: BorderRadius.circular(28), child: Image.file(_photo!, width: 88, height: 88, fit: BoxFit.cover))
-                  : UserAvatar(url: state.me?.photoUrl, nickname: state.me?.nickname, size: 88),
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: Image.file(
+                        _photo!,
+                        width: 88,
+                        height: 88,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : UserAvatar(
+                      url: state.me?.photoUrl,
+                      nickname: state.me?.nickname,
+                      size: 88,
+                    ),
             ),
           ),
           const SizedBox(height: 6),
-          Center(child: Text('사진 변경', style: TextStyle(fontSize: 11, color: Colors.grey.shade600))),
+          Center(
+            child: Text(
+              '사진 변경',
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            ),
+          ),
           const SizedBox(height: 16),
-          TextField(controller: _nickname, maxLength: 12, decoration: const InputDecoration(labelText: '닉네임', counterText: '')),
+          TextField(
+            controller: _nickname,
+            maxLength: 12,
+            decoration: const InputDecoration(
+              labelText: '닉네임',
+              counterText: '',
+            ),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: _bio, maxLines: 3, maxLength: 200, decoration: const InputDecoration(labelText: '자기소개', alignLabelWithHint: true, counterText: '')),
+          TextField(
+            controller: _bio,
+            maxLines: 3,
+            maxLength: 200,
+            decoration: const InputDecoration(
+              labelText: '자기소개',
+              alignLabelWithHint: true,
+              counterText: '',
+            ),
+          ),
           const SizedBox(height: 16),
-          const Text('연령대', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          const Text(
+            '연령대',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
             children: [
               for (final band in ['20s', '30s', '40s', '50s', '60s+'])
                 ChoiceChip(
-                  label: Text(band == '60s+' ? '60대+' : '${band.substring(0, 2)}대'),
+                  label: Text(
+                    band == '60s+' ? '60대+' : '${band.substring(0, 2)}대',
+                  ),
                   selected: _ageBand == band,
                   onSelected: (_) => setState(() => _ageBand = band),
                 ),
             ],
           ),
           const SizedBox(height: 16),
-          const Text('관심사', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          const Text(
+            '관심사',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
@@ -144,12 +192,19 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             }).toList(),
           ),
           const SizedBox(height: 16),
-          const Text('성별 (선택)', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          const Text(
+            '성별 (선택)',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
             children: [
-              for (final option in const [('NONE', '선택 안 함'), ('FEMALE', '여성'), ('MALE', '남성')])
+              for (final option in const [
+                ('NONE', '선택 안 함'),
+                ('FEMALE', '여성'),
+                ('MALE', '남성'),
+              ])
                 ChoiceChip(
                   label: Text(option.$2),
                   selected: _gender == option.$1,
@@ -166,18 +221,34 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           const SizedBox(height: 8),
           InkWell(
             onTap: () async {
-              final region = await Navigator.of(context).push<Region>(MaterialPageRoute(builder: (_) => RegionPickerScreen(selectedCode: _region?.code)));
+              final region = await Navigator.of(context).push<Region>(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      RegionPickerScreen(selectedCode: _region?.code),
+                ),
+              );
               if (region != null) setState(() => _region = region);
             },
             child: InputDecorator(
               decoration: const InputDecoration(labelText: '활동 지역'),
-              child: Text(_region == null ? '지역 선택' : '${_region!.city} ${_region!.name}'),
+              child: Text(
+                _region == null ? '지역 선택' : '${_region!.city} ${_region!.name}',
+              ),
             ),
           ),
           const SizedBox(height: 20),
           FilledButton(
             onPressed: _loading ? null : _save,
-            child: _loading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('저장'),
+            child: _loading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text('저장'),
           ),
         ],
       ),

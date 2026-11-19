@@ -57,12 +57,18 @@ class _NoteComposeSheetState extends State<NoteComposeSheet> {
       if (!mounted) return;
       if (e.code == 'ALREADY_CHATTING' && e.extra?['roomId'] != null) {
         Navigator.of(context).pop();
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => ChatScreen(roomId: '${e.extra!['roomId']}')));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ChatScreen(roomId: '${e.extra!['roomId']}'),
+          ),
+        );
       } else if (e.code == 'MUTUAL_PENDING' && e.extra?['noteId'] != null) {
         final roomId = await state.acceptNote('${e.extra!['noteId']}');
         if (!mounted) return;
         Navigator.of(context).pop();
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => ChatScreen(roomId: roomId)));
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => ChatScreen(roomId: roomId)));
         showInfo(context, '상대의 인사를 수락하고 대화를 열었어요.');
       } else {
         showError(context, e);
@@ -77,7 +83,9 @@ class _NoteComposeSheetState extends State<NoteComposeSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
         child: Column(
@@ -86,16 +94,32 @@ class _NoteComposeSheetState extends State<NoteComposeSheet> {
           children: [
             Row(
               children: [
-                UserAvatar(url: widget.user.photoUrl, nickname: widget.user.nickname, size: 44),
+                UserAvatar(
+                  url: widget.user.photoUrl,
+                  nickname: widget.user.nickname,
+                  size: 44,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${widget.user.nickname}님에게 인사', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                       Text(
-                        [widget.user.distanceLabel, widget.user.regionName].whereType<String>().join(' · '),
-                        style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                        '${widget.user.nickname}님에게 인사',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        [
+                          widget.user.distanceLabel,
+                          widget.user.regionName,
+                        ].whereType<String>().join(' · '),
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
@@ -129,7 +153,14 @@ class _NoteComposeSheetState extends State<NoteComposeSheet> {
             FilledButton(
               onPressed: _loading ? null : _send,
               child: _loading
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
                   : const Text('인사 보내기'),
             ),
           ],
@@ -168,7 +199,9 @@ class _MultiNoteScreenState extends State<MultiNoteScreen> {
 
   Future<void> _loadPreview() async {
     try {
-      final preview = await context.read<AppState>().multiNotePreview(widget.recipientIds);
+      final preview = await context.read<AppState>().multiNotePreview(
+        widget.recipientIds,
+      );
       if (mounted) setState(() => _preview = preview);
     } catch (e) {
       if (mounted) showError(context, e);
@@ -183,10 +216,18 @@ class _MultiNoteScreenState extends State<MultiNoteScreen> {
     }
     setState(() => _loading = true);
     try {
-      final result = await context.read<AppState>().sendMultiNote(widget.recipientIds, text);
+      final result = await context.read<AppState>().sendMultiNote(
+        widget.recipientIds,
+        text,
+      );
       if (mounted) {
-        setState(() => _sentCount = (result['sentCount'] as num?)?.toInt() ?? 0);
-        showInfo(context, '${result['sentCount']}명에게 인사를 보냈어요. ${result['charged']}P가 차감되었습니다.');
+        setState(
+          () => _sentCount = (result['sentCount'] as num?)?.toInt() ?? 0,
+        );
+        showInfo(
+          context,
+          '${result['sentCount']}명에게 인사를 보냈어요. ${result['charged']}P가 차감되었습니다.',
+        );
       }
     } catch (e) {
       if (mounted) showError(context, e);
@@ -201,7 +242,9 @@ class _MultiNoteScreenState extends State<MultiNoteScreen> {
     final cost = (_preview?['totalCost'] as num?)?.toInt() ?? 0;
     final balance = (_preview?['balance'] as num?)?.toInt() ?? 0;
     return Scaffold(
-      appBar: AppBar(title: Text('여러 명에게 인사 (${widget.recipientIds.length}명 선택)')),
+      appBar: AppBar(
+        title: Text('여러 명에게 인사 (${widget.recipientIds.length}명 선택)'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -215,11 +258,21 @@ class _MultiNoteScreenState extends State<MultiNoteScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('실제 발송 가능 $eligible명', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                Text(
+                  '실제 발송 가능 $eligible명',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   '수신 거부·차단·이미 인사/대화 중인 회원은 제외됩니다.\n예상 차감 ${cost}P · 보유 ${balance}P',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.5),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade700,
+                    height: 1.5,
+                  ),
                 ),
                 if ((_preview?['skipped'] as List?)?.isNotEmpty == true) ...[
                   const SizedBox(height: 8),
@@ -236,14 +289,30 @@ class _MultiNoteScreenState extends State<MultiNoteScreen> {
             controller: _controller,
             maxLength: 200,
             maxLines: 3,
-            decoration: const InputDecoration(hintText: '같은 관심사를 가진 이웃에게 보낼 인사말을 입력하세요.', alignLabelWithHint: true),
+            decoration: const InputDecoration(
+              hintText: '같은 관심사를 가진 이웃에게 보낼 인사말을 입력하세요.',
+              alignLabelWithHint: true,
+            ),
           ),
           const SizedBox(height: 10),
           FilledButton(
-            onPressed: _loading || eligible == 0 || cost > balance ? null : _send,
+            onPressed: _loading || eligible == 0 || cost > balance
+                ? null
+                : _send,
             child: _loading
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : Text(cost > balance ? '포인트가 부족합니다 (${cost}P 필요)' : '$eligible명에게 인사하고 ${cost}P 사용'),
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    cost > balance
+                        ? '포인트가 부족합니다 (${cost}P 필요)'
+                        : '$eligible명에게 인사하고 ${cost}P 사용',
+                  ),
           ),
           if (_sentCount != null) ...[
             const SizedBox(height: 14),
@@ -254,7 +323,8 @@ class _MultiNoteScreenState extends State<MultiNoteScreen> {
           ],
           const SizedBox(height: 12),
           TextButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const _PointsHint())),
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const _PointsHint())),
             child: const Text('포인트 충전 안내'),
           ),
         ],

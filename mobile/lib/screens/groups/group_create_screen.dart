@@ -42,14 +42,21 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
     setState(() => _loading = true);
     try {
       final room = await context.read<AppState>().createRoom(
-            title: _title.text.trim(),
-            description: _description.text.trim().isEmpty ? null : _description.text.trim(),
-            hashtags: _hashtags.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).take(5).toList(),
-            capacity: _capacity.round(),
-            joinApproval: _joinApproval,
-            regionCode: _region?.code,
-            image: _image,
-          );
+        title: _title.text.trim(),
+        description: _description.text.trim().isEmpty
+            ? null
+            : _description.text.trim(),
+        hashtags: _hashtags.text
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .take(5)
+            .toList(),
+        capacity: _capacity.round(),
+        joinApproval: _joinApproval,
+        regionCode: _region?.code,
+        image: _image,
+      );
       if (mounted) Navigator.of(context).pop(room);
     } catch (e) {
       if (mounted) showError(context, e);
@@ -68,7 +75,10 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
           Center(
             child: GestureDetector(
               onTap: () async {
-                final file = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1400);
+                final file = await ImagePicker().pickImage(
+                  source: ImageSource.gallery,
+                  maxWidth: 1400,
+                );
                 if (file != null) setState(() => _image = File(file.path));
               },
               child: Container(
@@ -80,32 +90,74 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
                   border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: _image == null
-                    ? const Icon(Icons.add_a_photo_outlined, color: Color(Brand.muted))
-                    : ClipRRect(borderRadius: BorderRadius.circular(20), child: Image.file(_image!, fit: BoxFit.cover)),
+                    ? const Icon(
+                        Icons.add_a_photo_outlined,
+                        color: Color(Brand.muted),
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.file(_image!, fit: BoxFit.cover),
+                      ),
               ),
             ),
           ),
           const SizedBox(height: 6),
-          Center(child: Text('대표 이미지 (선택)', style: TextStyle(fontSize: 11, color: Colors.grey.shade600))),
+          Center(
+            child: Text(
+              '대표 이미지 (선택)',
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            ),
+          ),
           const SizedBox(height: 16),
-          TextField(controller: _title, maxLength: 40, decoration: const InputDecoration(labelText: '방 이름', counterText: '')),
+          TextField(
+            controller: _title,
+            maxLength: 40,
+            decoration: const InputDecoration(
+              labelText: '방 이름',
+              counterText: '',
+            ),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: _description, maxLines: 3, maxLength: 300, decoration: const InputDecoration(labelText: '소개', alignLabelWithHint: true, counterText: '')),
+          TextField(
+            controller: _description,
+            maxLines: 3,
+            maxLength: 300,
+            decoration: const InputDecoration(
+              labelText: '소개',
+              alignLabelWithHint: true,
+              counterText: '',
+            ),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: _hashtags, decoration: const InputDecoration(labelText: '해시태그 (쉼표로 구분)', hintText: '카페, 산책, 독서')),
+          TextField(
+            controller: _hashtags,
+            decoration: const InputDecoration(
+              labelText: '해시태그 (쉼표로 구분)',
+              hintText: '카페, 산책, 독서',
+            ),
+          ),
           const SizedBox(height: 12),
           InkWell(
             onTap: () async {
-              final region = await Navigator.of(context).push<Region>(MaterialPageRoute(builder: (_) => const RegionPickerScreen()));
+              final region = await Navigator.of(context).push<Region>(
+                MaterialPageRoute(builder: (_) => const RegionPickerScreen()),
+              );
               if (region != null) setState(() => _region = region);
             },
             child: InputDecorator(
               decoration: const InputDecoration(labelText: '활동 지역 (선택)'),
-              child: Text(_region == null ? '지역 선택 안 함' : '${_region!.city} ${_region!.name}'),
+              child: Text(
+                _region == null
+                    ? '지역 선택 안 함'
+                    : '${_region!.city} ${_region!.name}',
+              ),
             ),
           ),
           const SizedBox(height: 16),
-          Text('정원 ${_capacity.round()}명', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          Text(
+            '정원 ${_capacity.round()}명',
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
           Slider(
             value: _capacity,
             min: 10,
@@ -119,12 +171,19 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
             value: _joinApproval,
             onChanged: (value) => setState(() => _joinApproval = value),
             title: const Text('가입 승인 필요', style: TextStyle(fontSize: 14)),
-            subtitle: const Text('방장·운영진이 승인해야 참여할 수 있습니다.', style: TextStyle(fontSize: 11.5)),
+            subtitle: const Text(
+              '방장·운영진이 승인해야 참여할 수 있습니다.',
+              style: TextStyle(fontSize: 11.5),
+            ),
           ),
           const SizedBox(height: 6),
           Text(
             '방을 만들면 방장이 됩니다. 방장은 공지 고정, 가입 승인, 강퇴, 방장 위임을 할 수 있으며\n나갈 때는 방장 위임 또는 방 종료가 필요합니다.',
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade600, height: 1.5),
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey.shade600,
+              height: 1.5,
+            ),
           ),
         ],
       ),
@@ -134,7 +193,14 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
           child: FilledButton(
             onPressed: _loading ? null : _submit,
             child: _loading
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
                 : const Text('방 만들기'),
           ),
         ),

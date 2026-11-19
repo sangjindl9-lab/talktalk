@@ -17,6 +17,7 @@ class AppUser {
   final int? points;
   final Map<String, bool> settings;
   final String? status;
+  final bool genderVisible;
 
   AppUser({
     required this.id,
@@ -34,6 +35,7 @@ class AppUser {
     this.points,
     this.settings = const {},
     this.status,
+    this.genderVisible = false,
   });
 
   bool setting(String key, {bool fallback = true}) => settings[key] ?? fallback;
@@ -54,31 +56,35 @@ class AppUser {
       gender: json['gender'] as String?,
       regionName: json['regionName'] as String?,
       regionCode: json['regionCode'] as String?,
-      interests: (json['interests'] as List?)?.map((e) => '$e').toList() ?? const [],
+      interests:
+          (json['interests'] as List?)?.map((e) => '$e').toList() ?? const [],
       bio: json['bio'] as String?,
       distanceLabel: json['distanceLabel'] as String?,
-      lastActiveLabel: json['lastActiveLabel'] as String? ?? json['activityLabel'] as String?,
+      lastActiveLabel:
+          json['lastActiveLabel'] as String? ??
+          json['activityLabel'] as String?,
       activityLabel: json['activityLabel'] as String?,
       points: json['points'] is int ? json['points'] as int : null,
       settings: settings,
       status: json['status'] as String?,
+      genderVisible: json['genderVisible'] == true,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'nickname': nickname,
-        'photoUrl': photoUrl,
-        'ageBand': ageBand,
-        'gender': gender,
-        'regionName': regionName,
-        'regionCode': regionCode,
-        'interests': interests,
-        'bio': bio,
-        'points': points,
-        'settings': settings,
-        'status': status,
-      };
+    'id': id,
+    'nickname': nickname,
+    'photoUrl': photoUrl,
+    'ageBand': ageBand,
+    'gender': gender,
+    'regionName': regionName,
+    'regionCode': regionCode,
+    'interests': interests,
+    'bio': bio,
+    'points': points,
+    'settings': settings,
+    'status': status,
+  };
 }
 
 class Region {
@@ -87,10 +93,10 @@ class Region {
   final String city;
   Region({required this.code, required this.name, required this.city});
   factory Region.fromJson(Map<String, dynamic> json) => Region(
-        code: '${json['code']}',
-        name: '${json['name']}',
-        city: '${json['city'] ?? ''}',
-      );
+    code: '${json['code']}',
+    name: '${json['name']}',
+    city: '${json['city'] ?? ''}',
+  );
 }
 
 class ChatSummary {
@@ -117,18 +123,18 @@ class ChatSummary {
   });
 
   factory ChatSummary.fromJson(Map<String, dynamic> json) => ChatSummary(
-        id: '${json['id']}',
-        type: '${json['type']}',
-        title: '${json['title']}',
-        imageUrl: json['imageUrl'] as String?,
-        memberCount: (json['memberCount'] as num?)?.toInt() ?? 0,
-        lastMessage: json['lastMessage'] == null
-            ? null
-            : ChatMessage.fromJson(json['lastMessage'] as Map<String, dynamic>),
-        unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
-        muted: json['muted'] == true,
-        lastMessageAt: json['lastMessageAt'] as String?,
-      );
+    id: '${json['id']}',
+    type: '${json['type']}',
+    title: '${json['title']}',
+    imageUrl: json['imageUrl'] as String?,
+    memberCount: (json['memberCount'] as num?)?.toInt() ?? 0,
+    lastMessage: json['lastMessage'] == null
+        ? null
+        : ChatMessage.fromJson(json['lastMessage'] as Map<String, dynamic>),
+    unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
+    muted: json['muted'] == true,
+    lastMessageAt: json['lastMessageAt'] as String?,
+  );
 }
 
 class ChatMessage {
@@ -143,6 +149,7 @@ class ChatMessage {
   final int seq;
   final DateTime createdAt;
   final bool masked;
+
   /// 전송 상태: sent(서버 확인) / pending(오프라인 큐) / failed
   final String state;
 
@@ -163,49 +170,57 @@ class ChatMessage {
 
   bool get isImage => type == 'IMAGE';
 
-  ChatMessage copyWith({String? id, int? seq, String? state, bool? masked, String? body, String? mediaId}) => ChatMessage(
-        id: id ?? this.id,
-        roomId: roomId,
-        senderId: senderId,
-        senderNickname: senderNickname,
-        type: type,
-        body: body ?? this.body,
-        mediaId: mediaId ?? this.mediaId,
-        clientMessageId: clientMessageId,
-        seq: seq ?? this.seq,
-        createdAt: createdAt,
-        masked: masked ?? this.masked,
-        state: state ?? this.state,
-      );
+  ChatMessage copyWith({
+    String? id,
+    int? seq,
+    String? state,
+    bool? masked,
+    String? body,
+    String? mediaId,
+  }) => ChatMessage(
+    id: id ?? this.id,
+    roomId: roomId,
+    senderId: senderId,
+    senderNickname: senderNickname,
+    type: type,
+    body: body ?? this.body,
+    mediaId: mediaId ?? this.mediaId,
+    clientMessageId: clientMessageId,
+    seq: seq ?? this.seq,
+    createdAt: createdAt,
+    masked: masked ?? this.masked,
+    state: state ?? this.state,
+  );
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
-        id: '${json['id']}',
-        roomId: '${json['roomId']}',
-        senderId: '${json['senderId']}',
-        senderNickname: '${json['senderNickname'] ?? ''}',
-        type: '${json['type'] ?? 'TEXT'}',
-        body: json['body'] as String?,
-        mediaId: json['mediaId'] as String?,
-        clientMessageId: json['clientMessageId'] as String?,
-        seq: int.tryParse('${json['seq']}') ?? 0,
-        createdAt: DateTime.tryParse('${json['createdAt']}')?.toLocal() ?? DateTime.now(),
-        masked: json['masked'] == true,
-      );
+    id: '${json['id']}',
+    roomId: '${json['roomId']}',
+    senderId: '${json['senderId']}',
+    senderNickname: '${json['senderNickname'] ?? ''}',
+    type: '${json['type'] ?? 'TEXT'}',
+    body: json['body'] as String?,
+    mediaId: json['mediaId'] as String?,
+    clientMessageId: json['clientMessageId'] as String?,
+    seq: int.tryParse('${json['seq']}') ?? 0,
+    createdAt:
+        DateTime.tryParse('${json['createdAt']}')?.toLocal() ?? DateTime.now(),
+    masked: json['masked'] == true,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'roomId': roomId,
-        'senderId': senderId,
-        'senderNickname': senderNickname,
-        'type': type,
-        'body': body,
-        'mediaId': mediaId,
-        'clientMessageId': clientMessageId,
-        'seq': seq,
-        'createdAt': createdAt.toIso8601String(),
-        'masked': masked,
-        'state': state,
-      };
+    'id': id,
+    'roomId': roomId,
+    'senderId': senderId,
+    'senderNickname': senderNickname,
+    'type': type,
+    'body': body,
+    'mediaId': mediaId,
+    'clientMessageId': clientMessageId,
+    'seq': seq,
+    'createdAt': createdAt.toIso8601String(),
+    'masked': masked,
+    'state': state,
+  };
 }
 
 class NoteRequestItem {
@@ -232,7 +247,8 @@ class NoteRequestItem {
     return '${map?['nickname'] ?? '이웃'}';
   }
 
-  factory NoteRequestItem.fromJson(Map<String, dynamic> json) => NoteRequestItem(
+  factory NoteRequestItem.fromJson(Map<String, dynamic> json) =>
+      NoteRequestItem(
         id: '${json['id']}',
         status: '${json['status']}',
         message: '${json['message'] ?? ''}',
@@ -284,23 +300,24 @@ class CommunityRoom {
   bool get isOwner => myRole == 'OWNER';
 
   factory CommunityRoom.fromJson(Map<String, dynamic> json) => CommunityRoom(
-        id: '${json['id']}',
-        type: '${json['type']}',
-        title: '${json['title']}',
-        description: json['description'] as String?,
-        imageUrl: json['imageUrl'] as String?,
-        hashtags: (json['hashtags'] as List?)?.map((e) => '$e').toList() ?? const [],
-        regionCode: json['regionCode'] as String?,
-        regionName: json['regionName'] as String?,
-        memberCount: (json['memberCount'] as num?)?.toInt() ?? 0,
-        capacity: (json['capacity'] as num?)?.toInt(),
-        joined: json['joined'] == true,
-        myRole: json['myRole'] as String?,
-        ownerId: json['ownerId'] as String?,
-        visibility: '${json['visibility'] ?? 'PUBLIC'}',
-        joinApproval: json['joinApproval'] == true,
-        banned: json['banned'] == true,
-      );
+    id: '${json['id']}',
+    type: '${json['type']}',
+    title: '${json['title']}',
+    description: json['description'] as String?,
+    imageUrl: json['imageUrl'] as String?,
+    hashtags:
+        (json['hashtags'] as List?)?.map((e) => '$e').toList() ?? const [],
+    regionCode: json['regionCode'] as String?,
+    regionName: json['regionName'] as String?,
+    memberCount: (json['memberCount'] as num?)?.toInt() ?? 0,
+    capacity: (json['capacity'] as num?)?.toInt(),
+    joined: json['joined'] == true,
+    myRole: json['myRole'] as String?,
+    ownerId: json['ownerId'] as String?,
+    visibility: '${json['visibility'] ?? 'PUBLIC'}',
+    joinApproval: json['joinApproval'] == true,
+    banned: json['banned'] == true,
+  );
 }
 
 class BoardPost {
@@ -389,10 +406,10 @@ class MarketItem {
   }
 
   String get statusLabel => switch (status) {
-        'RESERVED' => '예약중',
-        'SOLD' => '거래완료',
-        _ => '판매중',
-      };
+    'RESERVED' => '예약중',
+    'SOLD' => '거래완료',
+    _ => '판매중',
+  };
 
   factory MarketItem.fromJson(Map<String, dynamic> json) {
     final seller = json['seller'] as Map<String, dynamic>?;
@@ -417,12 +434,18 @@ class PointProduct {
   final int points;
   final int amount;
   final String type;
-  PointProduct({required this.productId, required this.title, required this.points, required this.amount, required this.type});
+  PointProduct({
+    required this.productId,
+    required this.title,
+    required this.points,
+    required this.amount,
+    required this.type,
+  });
   factory PointProduct.fromJson(Map<String, dynamic> json) => PointProduct(
-        productId: '${json['productId']}',
-        title: '${json['title']}',
-        points: (json['points'] as num?)?.toInt() ?? 0,
-        amount: (json['amount'] as num?)?.toInt() ?? 0,
-        type: '${json['type'] ?? 'POINTS'}',
-      );
+    productId: '${json['productId']}',
+    title: '${json['title']}',
+    points: (json['points'] as num?)?.toInt() ?? 0,
+    amount: (json['amount'] as num?)?.toInt() ?? 0,
+    type: '${json['type'] ?? 'POINTS'}',
+  );
 }

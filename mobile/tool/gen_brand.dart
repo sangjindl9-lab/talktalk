@@ -28,21 +28,41 @@ void main() {
     ..writeln("  static const String slug = '${service['slug']}';")
     ..writeln("  static const String tagline = '${service['tagline']}';")
     ..writeln("  static const String operator = '${service['operator']}';")
-    ..writeln("  static const String supportEmail = '${service['supportEmail']}';")
-    ..writeln("  static const String supportPhone = '${service['supportPhone']}';")
+    ..writeln(
+      "  static const String supportEmail = '${service['supportEmail']}';",
+    )
+    ..writeln(
+      "  static const String supportPhone = '${service['supportPhone']}';",
+    )
     ..writeln("  static const String website = '${service['website']}';")
     ..writeln("  static const String termsUrl = '${legal['termsUrl']}';")
     ..writeln("  static const String privacyUrl = '${legal['privacyUrl']}';")
     ..writeln('  static const int minimumAge = ${legal['minimumAge']};')
-    ..writeln("  static const String termsVersion = '${legal['termsVersion']}';")
-    ..writeln("  static const String privacyVersion = '${legal['privacyVersion']}';")
+    ..writeln(
+      "  static const String termsVersion = '${legal['termsVersion']}';",
+    )
+    ..writeln(
+      "  static const String privacyVersion = '${legal['privacyVersion']}';",
+    )
     ..writeln()
-    ..writeln('  static const int primary = ${colorToDart('${theme['primary']}')};')
-    ..writeln('  static const int primaryDark = ${colorToDart('${theme['primaryDark']}')};')
-    ..writeln('  static const int secondary = ${colorToDart('${theme['secondary']}')};')
-    ..writeln('  static const int accent = ${colorToDart('${theme['accent']}')};')
-    ..writeln('  static const int background = ${colorToDart('${theme['background']}')};')
-    ..writeln('  static const int surface = ${colorToDart('${theme['surface']}')};')
+    ..writeln(
+      '  static const int primary = ${colorToDart('${theme['primary']}')};',
+    )
+    ..writeln(
+      '  static const int primaryDark = ${colorToDart('${theme['primaryDark']}')};',
+    )
+    ..writeln(
+      '  static const int secondary = ${colorToDart('${theme['secondary']}')};',
+    )
+    ..writeln(
+      '  static const int accent = ${colorToDart('${theme['accent']}')};',
+    )
+    ..writeln(
+      '  static const int background = ${colorToDart('${theme['background']}')};',
+    )
+    ..writeln(
+      '  static const int surface = ${colorToDart('${theme['surface']}')};',
+    )
     ..writeln('  static const int text = ${colorToDart('${theme['text']}')};')
     ..writeln('  static const int muted = ${colorToDart('${theme['muted']}')};')
     ..writeln('}');

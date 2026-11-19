@@ -69,40 +69,68 @@ class WsClient {
   }) async {
     final socket = _socket;
     if (socket == null || !socket.connected) {
-      return {'ok': false, 'error': {'code': 'OFFLINE', 'message': '오프라인 상태입니다.'}};
+      return {
+        'ok': false,
+        'error': {'code': 'OFFLINE', 'message': '오프라인 상태입니다.'},
+      };
     }
     final completer = Completer<Map<String, dynamic>>();
-    socket.emitWithAck('message:send', {
-      'roomId': roomId,
-      'clientMessageId': clientMessageId,
-      'type': type,
-      'body': body,
-      'mediaId': mediaId,
-    }, ack: (data) {
-      if (data is Map) {
-        completer.complete(Map<String, dynamic>.from(data));
-      } else {
-        completer.complete({'ok': false, 'error': {'code': 'BAD_ACK', 'message': '응답을 확인할 수 없습니다.'}});
-      }
-    });
-    return completer.future.timeout(const Duration(seconds: 8), onTimeout: () {
-      return {'ok': false, 'error': {'code': 'TIMEOUT', 'message': '전송 확인이 지연되고 있습니다.'}};
-    });
+    socket.emitWithAck(
+      'message:send',
+      {
+        'roomId': roomId,
+        'clientMessageId': clientMessageId,
+        'type': type,
+        'body': body,
+        'mediaId': mediaId,
+      },
+      ack: (data) {
+        if (data is Map) {
+          completer.complete(Map<String, dynamic>.from(data));
+        } else {
+          completer.complete({
+            'ok': false,
+            'error': {'code': 'BAD_ACK', 'message': '응답을 확인할 수 없습니다.'},
+          });
+        }
+      },
+    );
+    return completer.future.timeout(
+      const Duration(seconds: 8),
+      onTimeout: () {
+        return {
+          'ok': false,
+          'error': {'code': 'TIMEOUT', 'message': '전송 확인이 지연되고 있습니다.'},
+        };
+      },
+    );
   }
 
-  Future<List<Map<String, dynamic>>> sync({required String roomId, required int afterSeq}) async {
+  Future<List<Map<String, dynamic>>> sync({
+    required String roomId,
+    required int afterSeq,
+  }) async {
     final socket = _socket;
     if (socket == null || !socket.connected) return const [];
     final completer = Completer<List<Map<String, dynamic>>>();
-    socket.emitWithAck('chat:sync', {'roomId': roomId, 'afterSeq': '$afterSeq'}, ack: (data) {
-      if (data is Map && data['ok'] == true) {
-        final list = (data['messages'] as List?) ?? const [];
-        completer.complete(list.map((e) => Map<String, dynamic>.from(e as Map)).toList());
-      } else {
-        completer.complete(const []);
-      }
-    });
-    return completer.future.timeout(const Duration(seconds: 8), onTimeout: () => const []);
+    socket.emitWithAck(
+      'chat:sync',
+      {'roomId': roomId, 'afterSeq': '$afterSeq'},
+      ack: (data) {
+        if (data is Map && data['ok'] == true) {
+          final list = (data['messages'] as List?) ?? const [];
+          completer.complete(
+            list.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
+          );
+        } else {
+          completer.complete(const []);
+        }
+      },
+    );
+    return completer.future.timeout(
+      const Duration(seconds: 8),
+      onTimeout: () => const [],
+    );
   }
 
   Future<void> markRead(String roomId, int seq) async {

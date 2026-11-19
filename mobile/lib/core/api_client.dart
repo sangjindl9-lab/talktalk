@@ -25,10 +25,10 @@ class ApiClient {
   String? token;
 
   Map<String, String> get _headers => {
-        'content-type': 'application/json; charset=utf-8',
-        'accept': 'application/json',
-        if (token != null) 'authorization': 'Bearer $token',
-      };
+    'content-type': 'application/json; charset=utf-8',
+    'accept': 'application/json',
+    if (token != null) 'authorization': 'Bearer $token',
+  };
 
   Uri _uri(String path, [Map<String, dynamic>? query]) {
     final base = Uri.parse('${Env.apiV1}$path');
@@ -40,25 +40,40 @@ class ApiClient {
     return base.replace(queryParameters: {...base.queryParameters, ...qp});
   }
 
-  Future<dynamic> _send(String method, String path, {Map<String, dynamic>? body, Map<String, dynamic>? query}) async {
+  Future<dynamic> _send(
+    String method,
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, dynamic>? query,
+  }) async {
     try {
       final uri = _uri(path, query);
       late http.Response res;
       switch (method) {
         case 'GET':
-          res = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 20));
+          res = await http
+              .get(uri, headers: _headers)
+              .timeout(const Duration(seconds: 20));
           break;
         case 'POST':
-          res = await http.post(uri, headers: _headers, body: jsonEncode(body ?? {})).timeout(const Duration(seconds: 20));
+          res = await http
+              .post(uri, headers: _headers, body: jsonEncode(body ?? {}))
+              .timeout(const Duration(seconds: 20));
           break;
         case 'PATCH':
-          res = await http.patch(uri, headers: _headers, body: jsonEncode(body ?? {})).timeout(const Duration(seconds: 20));
+          res = await http
+              .patch(uri, headers: _headers, body: jsonEncode(body ?? {}))
+              .timeout(const Duration(seconds: 20));
           break;
         case 'PUT':
-          res = await http.put(uri, headers: _headers, body: jsonEncode(body ?? {})).timeout(const Duration(seconds: 20));
+          res = await http
+              .put(uri, headers: _headers, body: jsonEncode(body ?? {}))
+              .timeout(const Duration(seconds: 20));
           break;
         case 'DELETE':
-          res = await http.delete(uri, headers: _headers, body: jsonEncode(body ?? {})).timeout(const Duration(seconds: 20));
+          res = await http
+              .delete(uri, headers: _headers, body: jsonEncode(body ?? {}))
+              .timeout(const Duration(seconds: 20));
           break;
         default:
           throw ApiException(0, 'METHOD_NOT_ALLOWED', '지원하지 않는 요청입니다.');
@@ -73,7 +88,9 @@ class ApiClient {
         }
       }
       if (res.statusCode >= 200 && res.statusCode < 300) return decoded;
-      final map = decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
+      final map = decoded is Map<String, dynamic>
+          ? decoded
+          : <String, dynamic>{};
       throw ApiException(
         res.statusCode,
         '${map['code'] ?? 'ERROR'}',
@@ -83,32 +100,49 @@ class ApiClient {
     } on ApiException {
       rethrow;
     } on SocketException {
-      throw ApiException(0, 'NETWORK_ERROR', '네트워크에 연결할 수 없습니다. 연결 상태를 확인해 주세요.');
+      throw ApiException(
+        0,
+        'NETWORK_ERROR',
+        '네트워크에 연결할 수 없습니다. 연결 상태를 확인해 주세요.',
+      );
     } catch (e) {
       throw ApiException(0, 'NETWORK_ERROR', '서버와 통신하지 못했습니다. ($e)');
     }
   }
 
-  Future<dynamic> get(String path, {Map<String, dynamic>? query}) => _send('GET', path, query: query);
-  Future<dynamic> post(String path, {Map<String, dynamic>? body}) => _send('POST', path, body: body);
-  Future<dynamic> patch(String path, {Map<String, dynamic>? body}) => _send('PATCH', path, body: body);
-  Future<dynamic> put(String path, {Map<String, dynamic>? body}) => _send('PUT', path, body: body);
-  Future<dynamic> delete(String path, {Map<String, dynamic>? body}) => _send('DELETE', path, body: body);
+  Future<dynamic> get(String path, {Map<String, dynamic>? query}) =>
+      _send('GET', path, query: query);
+  Future<dynamic> post(String path, {Map<String, dynamic>? body}) =>
+      _send('POST', path, body: body);
+  Future<dynamic> patch(String path, {Map<String, dynamic>? body}) =>
+      _send('PATCH', path, body: body);
+  Future<dynamic> put(String path, {Map<String, dynamic>? body}) =>
+      _send('PUT', path, body: body);
+  Future<dynamic> delete(String path, {Map<String, dynamic>? body}) =>
+      _send('DELETE', path, body: body);
 
   /// 이미지 업로드 (서버에서 형식·크기 검사 후 EXIF/GPS 제거)
-  Future<Map<String, dynamic>> uploadImage(File file, {String kind = 'CHAT'}) async {
+  Future<Map<String, dynamic>> uploadImage(
+    File file, {
+    String kind = 'CHAT',
+  }) async {
     try {
       final uri = _uri('/media');
       final req = http.MultipartRequest('POST', uri);
       req.headers['authorization'] = 'Bearer $token';
       req.headers['accept'] = 'application/json';
-      req.files.add(await http.MultipartFile.fromPath('file', file.path, contentType: null));
+      req.files.add(
+        await http.MultipartFile.fromPath('file', file.path, contentType: null),
+      );
       req.fields['kind'] = kind;
       final streamed = await req.send().timeout(const Duration(seconds: 60));
       final res = await http.Response.fromStream(streamed);
       final decoded = jsonDecode(utf8.decode(res.bodyBytes));
-      if (res.statusCode >= 200 && res.statusCode < 300) return decoded as Map<String, dynamic>;
-      final map = decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
+      if (res.statusCode >= 200 && res.statusCode < 300)
+        return decoded as Map<String, dynamic>;
+      final map = decoded is Map<String, dynamic>
+          ? decoded
+          : <String, dynamic>{};
       throw ApiException(res.statusCode, '${map['code']}', '${map['message']}');
     } on ApiException {
       rethrow;

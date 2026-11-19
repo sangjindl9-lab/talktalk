@@ -11,7 +11,11 @@ import '../../widgets/common.dart';
 import 'region_picker_screen.dart';
 
 class SignupProfileScreen extends StatefulWidget {
-  const SignupProfileScreen({super.key, required this.verificationToken, required this.phone});
+  const SignupProfileScreen({
+    super.key,
+    required this.verificationToken,
+    required this.phone,
+  });
   final String verificationToken;
   final String phone;
 
@@ -66,7 +70,11 @@ class _SignupProfileScreenState extends State<SignupProfileScreen> {
 
   Future<void> _pickPhoto() async {
     final picker = ImagePicker();
-    final file = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1200, imageQuality: 88);
+    final file = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1200,
+      imageQuality: 88,
+    );
     if (file != null) setState(() => _photo = File(file.path));
   }
 
@@ -75,7 +83,9 @@ class _SignupProfileScreenState extends State<SignupProfileScreen> {
     if (birth == null) return null;
     final now = DateTime.now();
     var age = now.year - birth.year;
-    if (now.month < birth.month || (now.month == birth.month && now.day < birth.day)) age--;
+    if (now.month < birth.month ||
+        (now.month == birth.month && now.day < birth.day))
+      age--;
     return age;
   }
 
@@ -148,15 +158,27 @@ class _SignupProfileScreenState extends State<SignupProfileScreen> {
                         ? const UserAvatar(size: 88, nickname: '톡')
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(28),
-                            child: Image.file(_photo!, width: 88, height: 88, fit: BoxFit.cover),
+                            child: Image.file(
+                              _photo!,
+                              width: 88,
+                              height: 88,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                     Positioned(
                       right: 0,
                       bottom: 0,
                       child: Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(color: Color(Brand.primary), shape: BoxShape.circle),
-                        child: const Icon(Icons.camera_alt, size: 14, color: Colors.white),
+                        decoration: const BoxDecoration(
+                          color: Color(Brand.primary),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 14,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -164,33 +186,54 @@ class _SignupProfileScreenState extends State<SignupProfileScreen> {
               ),
             ),
             const SizedBox(height: 6),
-            Center(child: Text('프로필 사진 (선택)', style: TextStyle(fontSize: 11, color: Colors.grey.shade600))),
+            Center(
+              child: Text(
+                '프로필 사진 (선택)',
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+              ),
+            ),
             const SizedBox(height: 18),
             TextFormField(
               controller: _nickname,
               maxLength: 12,
-              decoration: const InputDecoration(labelText: '닉네임', hintText: '한글·영문·숫자 2~12자', counterText: ''),
+              decoration: const InputDecoration(
+                labelText: '닉네임',
+                hintText: '한글·영문·숫자 2~12자',
+                counterText: '',
+              ),
               validator: (value) {
                 final text = value?.trim() ?? '';
-                if (text.length < 2 || text.length > 12) return '닉네임은 2~12자로 입력해 주세요.';
-                if (!RegExp(r'^[가-힣a-zA-Z0-9_]+$').hasMatch(text)) return '한글·영문·숫자·밑줄만 사용할 수 있어요.';
+                if (text.length < 2 || text.length > 12)
+                  return '닉네임은 2~12자로 입력해 주세요.';
+                if (!RegExp(r'^[가-힣a-zA-Z0-9_]+$').hasMatch(text))
+                  return '한글·영문·숫자·밑줄만 사용할 수 있어요.';
                 return null;
               },
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _realName,
-              decoration: const InputDecoration(labelText: '실명 (본인확인용, 비공개)', hintText: '다른 회원에게 공개되지 않습니다'),
-              validator: (value) => (value?.trim().isEmpty ?? true) ? '실명을 입력해 주세요.' : null,
+              decoration: const InputDecoration(
+                labelText: '실명 (본인확인용, 비공개)',
+                hintText: '다른 회원에게 공개되지 않습니다',
+              ),
+              validator: (value) =>
+                  (value?.trim().isEmpty ?? true) ? '실명을 입력해 주세요.' : null,
             ),
             const SizedBox(height: 12),
             InkWell(
               onTap: _pickBirthDate,
               child: InputDecorator(
-                decoration: const InputDecoration(labelText: '생년월일 (만 19세 이상, 비공개)'),
+                decoration: const InputDecoration(
+                  labelText: '생년월일 (만 19세 이상, 비공개)',
+                ),
                 child: Text(
-                  _birthDate == null ? '생년월일 선택' : '${_birthDate!.year}-${_birthDate!.month.toString().padLeft(2, '0')}-${_birthDate!.day.toString().padLeft(2, '0')}',
-                  style: TextStyle(color: _birthDate == null ? Colors.grey.shade600 : null),
+                  _birthDate == null
+                      ? '생년월일 선택'
+                      : '${_birthDate!.year}-${_birthDate!.month.toString().padLeft(2, '0')}-${_birthDate!.day.toString().padLeft(2, '0')}',
+                  style: TextStyle(
+                    color: _birthDate == null ? Colors.grey.shade600 : null,
+                  ),
                 ),
               ),
             ),
@@ -198,20 +241,30 @@ class _SignupProfileScreenState extends State<SignupProfileScreen> {
             InkWell(
               onTap: () async {
                 final region = await Navigator.of(context).push<Region>(
-                  MaterialPageRoute(builder: (_) => RegionPickerScreen(selectedCode: _region?.code)),
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        RegionPickerScreen(selectedCode: _region?.code),
+                  ),
                 );
                 if (region != null) setState(() => _region = region);
               },
               child: InputDecorator(
                 decoration: const InputDecoration(labelText: '활동 지역 (시군구)'),
                 child: Text(
-                  _region == null ? '지역 선택' : '${_region!.city} ${_region!.name}',
-                  style: TextStyle(color: _region == null ? Colors.grey.shade600 : null),
+                  _region == null
+                      ? '지역 선택'
+                      : '${_region!.city} ${_region!.name}',
+                  style: TextStyle(
+                    color: _region == null ? Colors.grey.shade600 : null,
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 18),
-            const Text('관심사 (1개 이상)', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+            const Text(
+              '관심사 (1개 이상)',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -238,15 +291,26 @@ class _SignupProfileScreenState extends State<SignupProfileScreen> {
               controller: _bio,
               maxLines: 3,
               maxLength: 200,
-              decoration: const InputDecoration(labelText: '자기소개 (선택)', alignLabelWithHint: true, counterText: ''),
+              decoration: const InputDecoration(
+                labelText: '자기소개 (선택)',
+                alignLabelWithHint: true,
+                counterText: '',
+              ),
             ),
             const SizedBox(height: 8),
-            const Text('성별 (선택)', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+            const Text(
+              '성별 (선택)',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               children: [
-                for (final option in const [('NONE', '선택 안 함'), ('FEMALE', '여성'), ('MALE', '남성')])
+                for (final option in const [
+                  ('NONE', '선택 안 함'),
+                  ('FEMALE', '여성'),
+                  ('MALE', '남성'),
+                ])
                   ChoiceChip(
                     label: Text(option.$2),
                     selected: _gender == option.$1,
@@ -259,7 +323,10 @@ class _SignupProfileScreenState extends State<SignupProfileScreen> {
               value: _genderVisible,
               onChanged: (value) => setState(() => _genderVisible = value),
               title: const Text('성별 공개', style: TextStyle(fontSize: 13.5)),
-              subtitle: const Text('끄면 다른 회원에게 성별이 보이지 않습니다.', style: TextStyle(fontSize: 11.5)),
+              subtitle: const Text(
+                '끄면 다른 회원에게 성별이 보이지 않습니다.',
+                style: TextStyle(fontSize: 11.5),
+              ),
             ),
             const SizedBox(height: 8),
             CheckboxListTile(
@@ -267,8 +334,14 @@ class _SignupProfileScreenState extends State<SignupProfileScreen> {
               value: _agreed,
               onChanged: (value) => setState(() => _agreed = value ?? false),
               controlAffinity: ListTileControlAffinity.leading,
-              title: const Text('[필수] 이용약관·개인정보 처리방침·연령 확인 동의', style: TextStyle(fontSize: 12.5)),
-              subtitle: const Text('만 19세 이상이며, 위치기반서비스 이용에 동의합니다.', style: TextStyle(fontSize: 11)),
+              title: const Text(
+                '[필수] 이용약관·개인정보 처리방침·연령 확인 동의',
+                style: TextStyle(fontSize: 12.5),
+              ),
+              subtitle: const Text(
+                '만 19세 이상이며, 위치기반서비스 이용에 동의합니다.',
+                style: TextStyle(fontSize: 11),
+              ),
             ),
           ],
         ),
@@ -279,7 +352,14 @@ class _SignupProfileScreenState extends State<SignupProfileScreen> {
           child: FilledButton(
             onPressed: _loading ? null : _submit,
             child: _loading
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
                 : const Text('가입하고 시작하기'),
           ),
         ),

@@ -36,11 +36,11 @@ class _PostWriteScreenState extends State<PostWriteScreen> {
     setState(() => _loading = true);
     try {
       await context.read<AppState>().createPost(
-            title: _title.text.trim(),
-            body: _body.text.trim(),
-            category: _category,
-            photo: _photo,
-          );
+        title: _title.text.trim(),
+        body: _body.text.trim(),
+        category: _category,
+        photo: _photo,
+      );
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) showError(context, e);
@@ -59,7 +59,12 @@ class _PostWriteScreenState extends State<PostWriteScreen> {
           Wrap(
             spacing: 8,
             children: [
-              for (final entry in const [('DAILY', '일상'), ('QUESTION', '질문'), ('HOBBY', '취미'), ('GATHER', '모임모집')])
+              for (final entry in const [
+                ('DAILY', '일상'),
+                ('QUESTION', '질문'),
+                ('HOBBY', '취미'),
+                ('GATHER', '모임모집'),
+              ])
                 ChoiceChip(
                   label: Text(entry.$2),
                   selected: _category == entry.$1,
@@ -68,13 +73,29 @@ class _PostWriteScreenState extends State<PostWriteScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          TextField(controller: _title, maxLength: 60, decoration: const InputDecoration(labelText: '제목', counterText: '')),
+          TextField(
+            controller: _title,
+            maxLength: 60,
+            decoration: const InputDecoration(labelText: '제목', counterText: ''),
+          ),
           const SizedBox(height: 10),
-          TextField(controller: _body, maxLines: 8, maxLength: 2000, decoration: const InputDecoration(labelText: '내용', alignLabelWithHint: true, counterText: '')),
+          TextField(
+            controller: _body,
+            maxLines: 8,
+            maxLength: 2000,
+            decoration: const InputDecoration(
+              labelText: '내용',
+              alignLabelWithHint: true,
+              counterText: '',
+            ),
+          ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: () async {
-              final file = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1600);
+              final file = await ImagePicker().pickImage(
+                source: ImageSource.gallery,
+                maxWidth: 1600,
+              );
               if (file != null) setState(() => _photo = File(file.path));
             },
             icon: const Icon(Icons.add_photo_alternate_outlined),
@@ -83,12 +104,24 @@ class _PostWriteScreenState extends State<PostWriteScreen> {
           if (_photo != null)
             Padding(
               padding: const EdgeInsets.only(top: 10),
-              child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(_photo!, height: 160, fit: BoxFit.cover)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(_photo!, height: 160, fit: BoxFit.cover),
+              ),
             ),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _loading ? null : _submit,
-            child: _loading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('등록'),
+            child: _loading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text('등록'),
           ),
         ],
       ),
@@ -127,12 +160,15 @@ class _MarketWriteScreenState extends State<MarketWriteScreen> {
     setState(() => _loading = true);
     try {
       await context.read<AppState>().createMarketItem(
-            title: _title.text.trim(),
-            description: _description.text.trim(),
-            price: _type == 'FREE' ? 0 : (int.tryParse(_price.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0),
-            type: _type,
-            photo: _photo,
-          );
+        title: _title.text.trim(),
+        description: _description.text.trim(),
+        price: _type == 'FREE'
+            ? 0
+            : (int.tryParse(_price.text.replaceAll(RegExp(r'[^0-9]'), '')) ??
+                  0),
+        type: _type,
+        photo: _photo,
+      );
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) showError(context, e);
@@ -151,7 +187,11 @@ class _MarketWriteScreenState extends State<MarketWriteScreen> {
           Wrap(
             spacing: 8,
             children: [
-              for (final entry in const [('SELL', '판매'), ('BUY', '구매'), ('FREE', '무료나눔')])
+              for (final entry in const [
+                ('SELL', '판매'),
+                ('BUY', '구매'),
+                ('FREE', '무료나눔'),
+              ])
                 ChoiceChip(
                   label: Text(entry.$2),
                   selected: _type == entry.$1,
@@ -160,21 +200,40 @@ class _MarketWriteScreenState extends State<MarketWriteScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          TextField(controller: _title, maxLength: 60, decoration: const InputDecoration(labelText: '제목', counterText: '')),
+          TextField(
+            controller: _title,
+            maxLength: 60,
+            decoration: const InputDecoration(labelText: '제목', counterText: ''),
+          ),
           const SizedBox(height: 10),
-          TextField(controller: _description, maxLines: 5, maxLength: 1000, decoration: const InputDecoration(labelText: '설명', alignLabelWithHint: true, counterText: '')),
+          TextField(
+            controller: _description,
+            maxLines: 5,
+            maxLength: 1000,
+            decoration: const InputDecoration(
+              labelText: '설명',
+              alignLabelWithHint: true,
+              counterText: '',
+            ),
+          ),
           if (_type != 'FREE') ...[
             const SizedBox(height: 10),
             TextField(
               controller: _price,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: '가격 (원)', hintText: '0'),
+              decoration: const InputDecoration(
+                labelText: '가격 (원)',
+                hintText: '0',
+              ),
             ),
           ],
           const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: () async {
-              final file = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1600);
+              final file = await ImagePicker().pickImage(
+                source: ImageSource.gallery,
+                maxWidth: 1600,
+              );
               if (file != null) setState(() => _photo = File(file.path));
             },
             icon: const Icon(Icons.add_photo_alternate_outlined),
@@ -183,12 +242,24 @@ class _MarketWriteScreenState extends State<MarketWriteScreen> {
           if (_photo != null)
             Padding(
               padding: const EdgeInsets.only(top: 10),
-              child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(_photo!, height: 160, fit: BoxFit.cover)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(_photo!, height: 160, fit: BoxFit.cover),
+              ),
             ),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _loading ? null : _submit,
-            child: _loading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('등록'),
+            child: _loading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text('등록'),
           ),
           const SizedBox(height: 8),
           Text(

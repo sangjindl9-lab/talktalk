@@ -33,11 +33,16 @@ class _BlockedScreenState extends State<BlockedScreen> {
           ? const EmptyState(icon: Icons.block_outlined, title: '차단한 회원이 없어요')
           : ListView.separated(
               itemCount: state.blockedUsers.length,
-              separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+              separatorBuilder: (_, __) =>
+                  Divider(height: 1, color: Colors.grey.shade100),
               itemBuilder: (context, index) {
                 final user = state.blockedUsers[index];
                 return ListTile(
-                  leading: UserAvatar(url: user['photoUrl'] as String?, nickname: '${user['nickname']}', size: 42),
+                  leading: UserAvatar(
+                    url: user['photoUrl'] as String?,
+                    nickname: '${user['nickname']}',
+                    size: 42,
+                  ),
                   title: Text('${user['nickname']}'),
                   trailing: TextButton(
                     onPressed: () async {

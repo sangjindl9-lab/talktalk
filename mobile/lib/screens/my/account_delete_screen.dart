@@ -33,10 +33,18 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('정말 탈퇴할까요?'),
-        content: const Text('프로필·사진·푸시 토큰이 삭제되고 다른 회원의 주변·검색에 노출되지 않습니다. 이 작업은 되돌릴 수 없습니다.'),
+        content: const Text(
+          '프로필·사진·푸시 토큰이 삭제되고 다른 회원의 주변·검색에 노출되지 않습니다. 이 작업은 되돌릴 수 없습니다.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('탈퇴')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('탈퇴'),
+          ),
         ],
       ),
     );
@@ -59,11 +67,18 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Text('탈퇴 전 확인해 주세요', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+          const Text(
+            '탈퇴 전 확인해 주세요',
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+          ),
           const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
             child: const Text(
               '· 프로필 사진과 소개가 삭제됩니다.\n'
               '· 푸시 알림 토큰이 삭제되어 알림이 오지 않습니다.\n'
@@ -77,7 +92,10 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
           TextField(
             controller: _reason,
             maxLines: 2,
-            decoration: const InputDecoration(labelText: '탈퇴 사유 (선택)', alignLabelWithHint: true),
+            decoration: const InputDecoration(
+              labelText: '탈퇴 사유 (선택)',
+              alignLabelWithHint: true,
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -89,7 +107,14 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
             onPressed: _loading ? null : _delete,
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade600),
             child: _loading
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
                 : const Text('계정 삭제'),
           ),
           const SizedBox(height: 10),

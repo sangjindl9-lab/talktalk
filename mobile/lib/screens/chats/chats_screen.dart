@@ -15,7 +15,8 @@ class ChatsScreen extends StatefulWidget {
   State<ChatsScreen> createState() => _ChatsScreenState();
 }
 
-class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStateMixin {
+class _ChatsScreenState extends State<ChatsScreen>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -42,7 +43,8 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
     try {
       final roomId = await state.acceptNote(note.id);
       if (!mounted) return;
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => ChatScreen(roomId: roomId)));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => ChatScreen(roomId: roomId)));
     } catch (e) {
       if (mounted) showError(context, e);
     }
@@ -59,8 +61,12 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final pending = state.receivedNotes.where((n) => n.status == 'PENDING').toList();
-    final others = state.receivedNotes.where((n) => n.status != 'PENDING').toList();
+    final pending = state.receivedNotes
+        .where((n) => n.status == 'PENDING')
+        .toList();
+    final others = state.receivedNotes
+        .where((n) => n.status != 'PENDING')
+        .toList();
     return Scaffold(
       appBar: AppBar(
         title: const Text('대화'),
@@ -70,7 +76,10 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
           indicatorColor: const Color(Brand.primary),
           tabs: [
             Tab(text: '새 요청 ${pending.isEmpty ? '' : '(${pending.length})'}'),
-            Tab(text: '대화 ${state.unreadMessageCount > 0 ? '(${state.unreadMessageCount})' : ''}'),
+            Tab(
+              text:
+                  '대화 ${state.unreadMessageCount > 0 ? '(${state.unreadMessageCount})' : ''}',
+            ),
             const Tab(text: '지난 인사'),
           ],
         ),
@@ -84,13 +93,20 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
               await state.loadChats();
             },
             child: pending.isEmpty
-                ? ListView(children: const [
-                    SizedBox(height: 80),
-                    EmptyState(icon: Icons.mark_email_unread_outlined, title: '새로 받은 인사가 없어요', subtitle: '주변 이웃에게 먼저 인사를 건네 보세요.'),
-                  ])
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyState(
+                        icon: Icons.mark_email_unread_outlined,
+                        title: '새로 받은 인사가 없어요',
+                        subtitle: '주변 이웃에게 먼저 인사를 건네 보세요.',
+                      ),
+                    ],
+                  )
                 : ListView.separated(
                     itemCount: pending.length,
-                    separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+                    separatorBuilder: (_, __) =>
+                        Divider(height: 1, color: Colors.grey.shade100),
                     itemBuilder: (context, index) {
                       final note = pending[index];
                       final from = note.from ?? {};
@@ -101,23 +117,49 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
                           children: [
                             Row(
                               children: [
-                                UserAvatar(url: from['photoUrl'] as String?, nickname: '${from['nickname']}', size: 44),
+                                UserAvatar(
+                                  url: from['photoUrl'] as String?,
+                                  nickname: '${from['nickname']}',
+                                  size: 44,
+                                ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text('${from['nickname']}', style: const TextStyle(fontWeight: FontWeight.w800)),
                                       Text(
-                                        [from['ageBand'], from['regionName']].whereType<String>().join(' · '),
-                                        style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                                        '${from['nickname']}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      Text(
+                                        [
+                                          from['ageBand'],
+                                          from['regionName'],
+                                        ].whereType<String>().join(' · '),
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          color: Colors.grey.shade600,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 TextButton(
-                                  onPressed: () => showReportSheet(context, targetType: 'PROFILE', targetId: '${from['id']}'),
-                                  child: const Text('신고', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                  onPressed: () => showReportSheet(
+                                    context,
+                                    targetType: 'PROFILE',
+                                    targetId: '${from['id']}',
+                                  ),
+                                  child: const Text(
+                                    '신고',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -130,7 +172,10 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(color: Colors.grey.shade200),
                               ),
-                              child: Text(note.message, style: const TextStyle(height: 1.5)),
+                              child: Text(
+                                note.message,
+                                style: const TextStyle(height: 1.5),
+                              ),
                             ),
                             const SizedBox(height: 10),
                             Row(
@@ -159,24 +204,49 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
           RefreshIndicator(
             onRefresh: state.loadChats,
             child: state.chats.isEmpty
-                ? ListView(children: const [
-                    SizedBox(height: 80),
-                    EmptyState(icon: Icons.forum_outlined, title: '아직 대화가 없어요', subtitle: '서로 인사를 수락하면 1:1 대화방이 만들어집니다.'),
-                  ])
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyState(
+                        icon: Icons.forum_outlined,
+                        title: '아직 대화가 없어요',
+                        subtitle: '서로 인사를 수락하면 1:1 대화방이 만들어집니다.',
+                      ),
+                    ],
+                  )
                 : ListView.separated(
                     itemCount: state.chats.length,
-                    separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+                    separatorBuilder: (_, __) =>
+                        Divider(height: 1, color: Colors.grey.shade100),
                     itemBuilder: (context, index) {
                       final chat = state.chats[index];
                       return ListTile(
-                        leading: UserAvatar(url: chat.imageUrl, nickname: chat.title, size: 48),
+                        leading: UserAvatar(
+                          url: chat.imageUrl,
+                          nickname: chat.title,
+                          size: 48,
+                        ),
                         title: Row(
                           children: [
-                            Expanded(child: Text(chat.title, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700))),
+                            Expanded(
+                              child: Text(
+                                chat.title,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
                             if (chat.type != 'DIRECT')
                               Padding(
                                 padding: const EdgeInsets.only(left: 6),
-                                child: Text('${chat.memberCount}명', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                                child: Text(
+                                  '${chat.memberCount}명',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
                               ),
                           ],
                         ),
@@ -184,11 +254,17 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
                           chat.lastMessage == null
                               ? '대화를 시작해 보세요'
                               : chat.lastMessage!.masked
-                                  ? '차단된 회원의 메시지입니다.'
-                                  : (chat.lastMessage!.body ?? (chat.lastMessage!.isImage ? '사진을 보냈습니다.' : '')),
+                              ? '차단된 회원의 메시지입니다.'
+                              : (chat.lastMessage!.body ??
+                                    (chat.lastMessage!.isImage
+                                        ? '사진을 보냈습니다.'
+                                        : '')),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                         trailing: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -196,15 +272,37 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
                           children: [
                             if (chat.unreadCount > 0)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(color: const Color(Brand.primary), borderRadius: BorderRadius.circular(10)),
-                                child: Text('${chat.unreadCount}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(Brand.primary),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '${chat.unreadCount}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
                               ),
                             const SizedBox(height: 4),
-                            if (chat.muted) Icon(Icons.notifications_off_outlined, size: 12, color: Colors.grey.shade400),
+                            if (chat.muted)
+                              Icon(
+                                Icons.notifications_off_outlined,
+                                size: 12,
+                                color: Colors.grey.shade400,
+                              ),
                           ],
                         ),
-                        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ChatScreen(roomId: chat.id))),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ChatScreen(roomId: chat.id),
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -212,13 +310,16 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
           RefreshIndicator(
             onRefresh: state.loadNotes,
             child: others.isEmpty
-                ? ListView(children: const [
-                    SizedBox(height: 80),
-                    EmptyState(icon: Icons.history, title: '지난 인사가 없어요'),
-                  ])
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyState(icon: Icons.history, title: '지난 인사가 없어요'),
+                    ],
+                  )
                 : ListView.separated(
                     itemCount: others.length,
-                    separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+                    separatorBuilder: (_, __) =>
+                        Divider(height: 1, color: Colors.grey.shade100),
                     itemBuilder: (context, index) {
                       final note = others[index];
                       final from = note.from ?? {};
@@ -229,12 +330,32 @@ class _ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStat
                         _ => note.status,
                       };
                       return ListTile(
-                        leading: UserAvatar(url: from['photoUrl'] as String?, nickname: '${from['nickname']}', size: 44),
+                        leading: UserAvatar(
+                          url: from['photoUrl'] as String?,
+                          nickname: '${from['nickname']}',
+                          size: 44,
+                        ),
                         title: Text('${from['nickname']}'),
-                        subtitle: Text(note.message, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                        trailing: Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                        subtitle: Text(
+                          note.message,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
                         onTap: note.roomId != null
-                            ? () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ChatScreen(roomId: note.roomId!)))
+                            ? () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      ChatScreen(roomId: note.roomId!),
+                                ),
+                              )
                             : null,
                       );
                     },

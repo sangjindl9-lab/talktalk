@@ -44,9 +44,23 @@ void main() {
 
   group('MarketItem', () {
     test('가격/상태 라벨을 계산한다', () {
-      final free = MarketItem.fromJson({'id': 'i1', 'type': 'FREE', 'title': '나눔', 'description': '', 'price': 0, 'status': 'ON_SALE'});
+      final free = MarketItem.fromJson({
+        'id': 'i1',
+        'type': 'FREE',
+        'title': '나눔',
+        'description': '',
+        'price': 0,
+        'status': 'ON_SALE',
+      });
       expect(free.priceLabel, '무료 나눔');
-      final sold = MarketItem.fromJson({'id': 'i2', 'type': 'SELL', 'title': '의자', 'description': '', 'price': 10000, 'status': 'SOLD'});
+      final sold = MarketItem.fromJson({
+        'id': 'i2',
+        'type': 'SELL',
+        'title': '의자',
+        'description': '',
+        'price': 10000,
+        'status': 'SOLD',
+      });
       expect(sold.priceLabel, '10000원');
       expect(sold.statusLabel, '거래완료');
     });
@@ -54,7 +68,13 @@ void main() {
 
   group('CommunityRoom', () {
     test('정원 초과 여부를 계산한다', () {
-      final room = CommunityRoom.fromJson({'id': 'r1', 'type': 'GROUP', 'title': '산책모임', 'memberCount': 10, 'capacity': 10});
+      final room = CommunityRoom.fromJson({
+        'id': 'r1',
+        'type': 'GROUP',
+        'title': '산책모임',
+        'memberCount': 10,
+        'capacity': 10,
+      });
       expect(room.isFull, isTrue);
       expect(room.joined, isFalse);
     });

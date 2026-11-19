@@ -10,7 +10,8 @@ class Brand {
   static const String supportPhone = '033-742-0000';
   static const String website = 'https://talktalk.eumsoft.co.kr';
   static const String termsUrl = 'https://talktalk.eumsoft.co.kr/legal/terms';
-  static const String privacyUrl = 'https://talktalk.eumsoft.co.kr/legal/privacy';
+  static const String privacyUrl =
+      'https://talktalk.eumsoft.co.kr/legal/privacy';
   static const int minimumAge = 19;
   static const String termsVersion = '2026-11-01';
   static const String privacyVersion = '2026-11-01';

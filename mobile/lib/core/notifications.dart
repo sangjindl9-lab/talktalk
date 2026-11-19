@@ -5,7 +5,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 /// 잠금화면 미리보기는 서버의 pushPreview 설정을 따른다.
 /// (실제 푸시는 FCM/APNs 키 설정 후 토큰을 서버에 등록해 사용한다.)
 class NotificationService {
-  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   bool _ready = false;
 
   Future<void> init() async {
@@ -22,7 +23,9 @@ class NotificationService {
     );
     if (Platform.isAndroid) {
       await _plugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.requestNotificationsPermission();
     }
     _ready = true;
@@ -40,6 +43,11 @@ class NotificationService {
       ),
       iOS: DarwinNotificationDetails(),
     );
-    await _plugin.show(DateTime.now().millisecondsSinceEpoch ~/ 1000, title, body, details);
+    await _plugin.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      title,
+      body,
+      details,
+    );
   }
 }
