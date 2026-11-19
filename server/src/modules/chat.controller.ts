@@ -43,7 +43,7 @@ export class ChatController {
   send(
     @CurrentUser() auth: { sub: string },
     @Param('id') id: string,
-    @Body() body: { type?: 'TEXT' | 'IMAGE'; body?: string; mediaId?: string; clientMessageId?: string },
+    @Body() body: { type?: 'TEXT' | 'IMAGE'; body?: string; mediaId?: string; clientMessageId?: string; replyToId?: string },
   ) {
     return this.chat.sendMessage(id, auth.sub, body);
   }

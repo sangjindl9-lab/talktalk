@@ -66,6 +66,7 @@ class WsClient {
     String type = 'TEXT',
     String? body,
     String? mediaId,
+    String? replyToId,
   }) async {
     final socket = _socket;
     if (socket == null || !socket.connected) {

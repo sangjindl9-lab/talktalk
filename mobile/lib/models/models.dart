@@ -146,6 +146,8 @@ class ChatMessage {
   final String? body;
   final String? mediaId;
   final String? clientMessageId;
+  final String? replyToId;
+  final String? replyPreview;
   final int seq;
   final DateTime createdAt;
   final bool masked;
@@ -162,6 +164,8 @@ class ChatMessage {
     this.body,
     this.mediaId,
     this.clientMessageId,
+    this.replyToId,
+    this.replyPreview,
     this.seq = 0,
     required this.createdAt,
     this.masked = false,

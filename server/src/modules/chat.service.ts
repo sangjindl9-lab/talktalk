@@ -11,6 +11,7 @@ export interface SendMessageInput {
   body?: string;
   mediaId?: string;
   clientMessageId?: string;
+  replyToId?: string;
 }
 
 export interface SerializedMessage {
@@ -22,6 +23,8 @@ export interface SerializedMessage {
   body: string | null;
   mediaId: string | null;
   clientMessageId: string | null;
+  replyToId: string | null;
+  replyPreview: string | null;
   seq: string;
   createdAt: string;
   masked: boolean;
@@ -48,6 +51,8 @@ export class ChatService {
       body: masked ? null : message.body,
       mediaId: masked ? null : message.mediaId,
       clientMessageId: message.clientMessageId,
+      replyToId: message.replyToId ?? null,
+      replyPreview: masked ? null : message.replyPreview ?? null,
       seq: message.seq.toString(),
       createdAt: message.createdAt.toISOString(),
       masked,
@@ -264,11 +269,26 @@ export class ChatService {
       body = body ? body.slice(0, 500) : null;
     }
 
+    let replyToId: string | null = null;
+    let replyPreview: string | null = null;
+    if (input.replyToId) {
+      const target = await this.prisma.message.findUnique({
+        where: { id: input.replyToId },
+        include: { sender: { select: { nickname: true } } },
+      });
+      if (!target || target.roomId !== roomId || target.deletedAt) {
+        throw apiError(400, 'REPLY_TARGET_INVALID', '답장할 메시지를 찾을 수 없습니다.');
+      }
+      replyToId = target.id;
+      const preview = target.body ?? (target.type === 'IMAGE' ? '[사진]' : '');
+      replyPreview = `${target.sender.nickname}: ${preview}`.slice(0, 120);
+    }
+
     let message;
     try {
       message = await this.prisma.$transaction(async (tx) => {
         const created = await tx.message.create({
-          data: { roomId, senderId: userId, type, body, mediaId, clientMessageId },
+          data: { roomId, senderId: userId, type, body, mediaId, clientMessageId, replyToId, replyPreview },
           include: { sender: { select: { nickname: true, status: true } } },
         });
         await tx.chatRoom.update({ where: { id: roomId }, data: { lastMessageAt: new Date() } });

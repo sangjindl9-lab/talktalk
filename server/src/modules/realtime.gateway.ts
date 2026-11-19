@@ -101,7 +101,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   async sendMessage(
     @ConnectedSocket() socket: AuthedSocket,
     @MessageBody()
-    body: { roomId: string; type?: 'TEXT' | 'IMAGE'; body?: string; mediaId?: string; clientMessageId?: string },
+    body: { roomId: string; type?: 'TEXT' | 'IMAGE'; body?: string; mediaId?: string; clientMessageId?: string; replyToId?: string },
   ) {
     try {
       const allowed = await this.redis.take(`ws:msg:${socket.data.userId}`, 30, 10);
@@ -111,6 +111,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         body: body.body,
         mediaId: body.mediaId,
         clientMessageId: body.clientMessageId,
+        replyToId: body.replyToId,
       });
       return { ok: true, message: result.message, duplicated: result.duplicated };
     } catch (e) {

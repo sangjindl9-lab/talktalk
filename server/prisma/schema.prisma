@@ -436,6 +436,8 @@ model Message {
   mediaId         String?
   media           Media?      @relation(fields: [mediaId], references: [id])
   clientMessageId String?
+  replyToId       String?
+  replyPreview    String?
   seq             BigInt      @unique @default(autoincrement())
   hiddenByAdmin   Boolean     @default(false)
   deletedAt       DateTime?

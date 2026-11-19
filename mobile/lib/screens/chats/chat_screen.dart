@@ -25,6 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Map<String, dynamic>? _room;
   bool _sending = false;
   bool _muted = false;
+  ChatMessage? _replyTo;
   AppState? _state;
 
   @override
@@ -82,7 +83,15 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() => _sending = true);
     _controller.clear();
     try {
-      await context.read<AppState>().sendText(widget.roomId, text);
+      await context.read<AppState>().sendText(
+        widget.roomId,
+        text,
+        replyToId: _replyTo?.id,
+        replyPreview: _replyTo == null
+            ? null
+            : '${_replyTo!.senderNickname}: ${_replyTo!.body ?? (isImageLabel(_replyTo!))}',
+      );
+      if (mounted) setState(() => _replyTo = null);
       _jumpToBottom();
     } catch (e) {
       if (mounted) showError(context, e);
@@ -370,6 +379,14 @@ class _ChatScreenState extends State<ChatScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   ListTile(
+                                    leading: const Icon(Icons.reply),
+                                    title: const Text('답장'),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      setState(() => _replyTo = message);
+                                    },
+                                  ),
+                                  ListTile(
                                     leading: const Icon(Icons.copy),
                                     title: const Text('메시지 복사'),
                                     onTap: () {
@@ -404,6 +421,37 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
           ),
+          if (_replyTo != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+              color: const Color(Brand.primary).withValues(alpha: 0.08),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.reply,
+                    size: 16,
+                    color: Color(Brand.primaryDark),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      '${_replyTo!.senderNickname}: ${_replyTo!.body ?? (isImageLabel(_replyTo!))}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(Brand.primaryDark),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => setState(() => _replyTo = null),
+                    icon: const Icon(Icons.close, size: 16),
+                  ),
+                ],
+              ),
+            ),
           SafeArea(
             top: false,
             child: Container(
@@ -458,6 +506,8 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+
+String isImageLabel(ChatMessage message) => message.isImage ? '[사진]' : '';
 
 class _MessageBubble extends StatelessWidget {
   const _MessageBubble({
@@ -558,18 +608,49 @@ class _MessageBubble extends StatelessWidget {
                               ),
                             ),
                           )
-                        : Text(
-                            body,
-                            style: TextStyle(
-                              fontSize: 14,
-                              height: 1.45,
-                              color: mine
-                                  ? Colors.white
-                                  : const Color(Brand.text),
-                              fontStyle: message.masked
-                                  ? FontStyle.italic
-                                  : null,
-                            ),
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (message.replyPreview != null &&
+                                  !message.masked)
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 5),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: mine
+                                        ? Colors.white.withValues(alpha: 0.18)
+                                        : Colors.black.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    message.replyPreview!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: mine
+                                          ? Colors.white70
+                                          : const Color(Brand.muted),
+                                    ),
+                                  ),
+                                ),
+                              Text(
+                                body,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  height: 1.45,
+                                  color: mine
+                                      ? Colors.white
+                                      : const Color(Brand.text),
+                                  fontStyle: message.masked
+                                      ? FontStyle.italic
+                                      : null,
+                                ),
+                              ),
+                            ],
                           ),
                   ),
                 ),

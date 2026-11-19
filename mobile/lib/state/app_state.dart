@@ -476,7 +476,12 @@ class AppState extends ChangeNotifier {
   }
 
   /// 메시지 전송: 낙관적 표시 → 실패 시 오프라인 큐에 보관.
-  Future<void> sendText(String roomId, String text) async {
+  Future<void> sendText(
+    String roomId,
+    String text, {
+    String? replyToId,
+    String? replyPreview,
+  }) async {
     final clientMessageId =
         'c-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(9999)}';
     final local = ChatMessage(
@@ -487,6 +492,8 @@ class AppState extends ChangeNotifier {
       type: 'TEXT',
       body: text,
       clientMessageId: clientMessageId,
+      replyToId: replyToId,
+      replyPreview: replyPreview,
       createdAt: DateTime.now(),
       state: 'pending',
     );
@@ -511,6 +518,8 @@ class AppState extends ChangeNotifier {
           'clientMessageId': clientMessageId,
           'type': 'TEXT',
           'body': text,
+          'replyToId': replyToId,
+          'replyPreview': replyPreview,
           'createdAt': local.createdAt.toIso8601String(),
         });
         _setState(roomId, clientMessageId, 'failed');

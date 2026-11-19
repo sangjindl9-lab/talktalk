@@ -24,7 +24,7 @@ cd ../admin && npx tsc --noEmit && next build   # 통과
 | 서버 빌드 (`nest build`) | ✅ `server/dist/main.js` 생성 |
 | Next.js 타입체크 | ✅ 오류 0 |
 | Next.js 빌드 | ✅ 18개 라우트 생성 (`/login`, `/dashboard`, `/reports`, `/reports/[id]`, `/members`, `/members/[id]`, `/rooms`, `/posts`, `/ledger`, `/payments`, `/notices`, `/inquiries`, `/appeals`, `/settings`, `/audit`, `/accounts`) |
-| DB 마이그레이션 | ✅ 2건 적용 (`20261119115921_init`, `member_read_seq`) + 부분 유니크 인덱스 2종 |
+| DB 마이그레이션 | ✅ 3건 적용 (`20261119115921_init`, `member_read_seq`, `message_reply`) + 부분 유니크 인덱스 2종 |
 | 통합 테스트 ①~⑨ | ✅ **9/9 통과** |
 
 테스트는 실제 NestJS 서버를 별도 포트(4100)로 기동하고, **실제 PostgreSQL**과 **Socket.IO 클라이언트 2대**를 사용했습니다. 가짜 회원·모킹 DB는 사용하지 않았습니다(개발 시드 계정 제외).
@@ -104,7 +104,7 @@ cd ../admin && npx tsc --noEmit && next build   # 통과
 | 프로필 | 닉네임·사진·연령대·지역(시군구)·관심사·소개·성별(선택·공개여부), 실명/생년월일/휴대폰 비노출 | 서버 통합 ✅ |
 | 주변 친구 | 5탭, 가까운순/최근활동순, 지역·연령·관심사 필터, 거리 라벨만 반환, 3종 토글, 가짜 회원 없음 | 서버 통합 ✅ (⑤) |
 | 쪽지·1:1 | 1건 텍스트·링크/사진 차단, 대기 중복 방지, 동시 수락 단일 방, 다중 인사(예상 비용·실제 발송분 차감) | 서버 통합 ✅ (①) |
-| 대화 | 텍스트·사진, 참여자 외 403, 답장·읽음·안읽음 수, 검색·복사·TXT 내보내기, 알림 끄기, 방 나가기 | 서버 통합 ✅ (②③④) |
+| 대화 | 텍스트·사진, 참여자 외 403, 답장(인용 미리보기), 읽음·안읽음 수, 검색·복사·TXT 내보내기, 알림 끄기, 방 나가기 | 서버 통합 ✅ (②③④) |
 | 실시간 | Socket.IO, `clientMessageId` 중복 방지, 재연결 `chat:sync`, 오프라인 큐, 푸시 미리보기 OFF | 서버 통합 ✅ (③) |
 | 지역방·그룹방 | 상설 지역방, 관심사 그룹방, 제목·이미지·소개·해시태그·정원·검색노출·공개/비밀·가입승인, 방장/운영진/강퇴/위임/종료 | 서버 통합 ✅ (⑤⑥) |
 | 동네·장터 | 게시판 4종·사진·댓글·공감·북마크·신고, 장터 3종·가격·상태 변경·거래문의(상품명+사진 대화) | 서버 통합 ✅ (⑦) |
@@ -121,7 +121,7 @@ cd ../admin && npx tsc --noEmit && next build   # 통과
 | 서버 ↔ 실제 DB 통합 | ①~⑨ 전체, 마이그레이션·시드 | ✅ 실행·통과 |
 | 관리자 웹 실서버 연동 | `/login` 200 렌더, `/dashboard` 미인증 시 307→`/login`, 관리자 로그인 API 200 | ✅ 확인 |
 | 관리자 웹 브라우저 UI 조작 | 로그인 후 화면별 클릭·입력 | ⚠ 미실행 (서버 렌더·빌드까지만 확인) |
-| Flutter 앱 빌드/실행 | Flutter SDK·Android SDK·Xcode 미설치 | ⚠ **미검증** (전체 소스 작성 완료) |
+| Flutter 앱 빌드/실행 | Flutter SDK·Android SDK·Xcode 미설치 | ⚠ **미검증** (전체 소스 작성 완료, Dart SDK 3.14.1 `dart format` 파싱 검사 42개 파일 통과) |
 | Android 테스트 APK / Play AAB | CI 워크플로우만 작성 | ⚠ **미생성** |
 | iOS 실빌드 / TestFlight | macOS·Xcode 없음 | ⚠ **미검증** |
 | 인앱결제 실결제 | Play/App Store 상품 미등록, 검증은 `IAP_PROVIDER=mock` | ⚠ 모의 검증만 |
@@ -135,7 +135,7 @@ cd ../admin && npx tsc --noEmit && next build   # 통과
 
 ## 5. 알려진 제약·후속 작업
 
-1. **Flutter 앱**: `lib/` 전체 화면·상태·오프라인 큐·소켓·인앱결제 코드 작성, Android(`compileSdk 35`, Kotlin DSL) 및 iOS(`Runner.xcodeproj`, Info.plist 권한 문구) 구성 완료. SDK가 없어 `flutter analyze`/`build`는 실행하지 못했습니다. 첫 빌드 시 `flutter pub get` 후 `pod install`이 필요하며, 플러그인 버전 해석 오류가 나면 `pubspec.yaml`의 플러그인 버전을 최신 안정판으로 조정하세요.
+1. **Flutter 앱**: `lib/` 전체 화면·상태·오프라인 큐·소켓·인앱결제 코드 작성, Android(`compileSdk 35`, Kotlin DSL) 및 iOS(`Runner.xcodeproj`, Info.plist 권한 문구) 구성 완료. SDK가 없어 `flutter analyze`/`build`는 실행하지 못했으며, Dart SDK 3.14.1로 42개 파일의 파싱(`dart format`)만 검증했습니다. 첫 빌드 시 `flutter pub get` 후 `pod install`이 필요하며, 플러그인 버전 해석 오류가 나면 `pubspec.yaml`의 플러그인 버전을 최신 안정판으로 조정하세요.
 2. **푸시**: `POST /api/v1/me/devices`로 토큰 등록까지 구현. FCM v1 발송은 서비스 계정 키 주입 후 `NotificationService`에 연결 필요.
 3. **본인확인**: `IDENTITY_PROVIDER`/`SMS_API_URL` 설정 시 실제 발송·검증 호출 경로가 동작하도록 코드가 분기되어 있으나, 계약된 기관 API 스펙에 맞춘 최종 매핑 필요.
 4. **상단고정 만료**: 60초 주기 + 조회 시 `endsAt > now` 필터로 즉시 미노출. 대규모 트래픽에서는 배치/큐 전환 권장.
