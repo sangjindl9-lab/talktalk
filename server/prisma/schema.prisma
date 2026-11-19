@@ -1,0 +1,783 @@
+// 톡톡 Talk Talk - Prisma schema
+// PostgreSQL 15+ / Prisma 6.x
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NONE
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum AdminRole {
+  SUPERADMIN
+  MODERATOR
+  SUPPORT
+  FINANCE
+}
+
+enum MediaKind {
+  PROFILE
+  CHAT
+  BOARD
+  MARKET
+  ROOM
+  NOTICE
+  INQUIRY
+}
+
+enum NoteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELED
+  EXPIRED
+}
+
+enum RoomType {
+  DIRECT
+  REGION
+  INTEREST
+  GROUP
+  MARKET
+}
+
+enum MemberRole {
+  OWNER
+  MANAGER
+  MEMBER
+}
+
+enum RoomStatus {
+  ACTIVE
+  CLOSED
+  BLOCKED
+}
+
+enum RoomVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  SYSTEM
+}
+
+enum BoardCategory {
+  DAILY
+  QUESTION
+  HOBBY
+  GATHER
+}
+
+enum BoardStatus {
+  ACTIVE
+  HIDDEN
+  DELETED
+}
+
+enum MarketType {
+  SELL
+  BUY
+  FREE
+}
+
+enum MarketStatus {
+  ON_SALE
+  RESERVED
+  SOLD
+}
+
+enum PromotionStatus {
+  PENDING
+  ACTIVE
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
+enum PointTxType {
+  CHARGE
+  USE
+  REFUND
+  ADMIN_ADJUST
+  BONUS
+  SUBSCRIPTION
+}
+
+enum PaymentPlatform {
+  GOOGLE
+  APPLE
+  ADMIN
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  DUPLICATE
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  REFUNDED
+  CANCELED
+}
+
+enum ReportTargetType {
+  PROFILE
+  MESSAGE
+  PHOTO
+  POST
+  COMMENT
+  ROOM
+}
+
+enum ReportReason {
+  SPAM
+  ABUSE
+  SEXUAL
+  FRAUD
+  ILLEGAL
+  ETC
+}
+
+enum ReportStatus {
+  RECEIVED
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum ModerationActionType {
+  WARN
+  HIDE_CONTENT
+  SUSPEND_7D
+  SUSPEND_30D
+  PERMANENT_BAN
+  DISMISS
+  RESTORE
+}
+
+enum NotificationType {
+  NOTE_REQUEST
+  NOTE_ACCEPTED
+  MESSAGE
+  ROOM_NOTICE
+  REPORT_RESULT
+  POINT
+  SYSTEM
+}
+
+enum AppealStatus {
+  OPEN
+  ACCEPTED
+  REJECTED
+}
+
+enum InquiryStatus {
+  OPEN
+  ANSWERED
+  CLOSED
+}
+
+model Region {
+  code     String   @id
+  name     String
+  city     String
+  district String?
+  lat      Float
+  lng      Float
+  isActive Boolean  @default(true)
+  users    User[]
+  rooms    ChatRoom[]
+  posts    BoardPost[]
+  markets  MarketItem[]
+
+  @@index([city, name])
+}
+
+model User {
+  id               String     @id @default(cuid())
+  phone            String     @unique
+  phoneVerifiedAt  DateTime?
+  realName         String?
+  birthDate        DateTime?
+  isAdult          Boolean    @default(false)
+  identityVerified Boolean    @default(false)
+  identityProvider String?
+  nickname         String     @unique
+  photoMediaId     String?
+  photoUrl         String?
+  ageBand          String?
+  gender           Gender     @default(NONE)
+  genderVisible    Boolean    @default(false)
+  regionCode       String?
+  region           Region?    @relation(fields: [regionCode], references: [code])
+  regionName       String?
+  interests        String[]   @default([])
+  bio              String?
+  status           UserStatus @default(ACTIVE)
+  suspendedUntil   DateTime?
+  suspensionReason String?
+  showNearby       Boolean    @default(true)
+  showLastActive   Boolean    @default(true)
+  receiveGreetings Boolean    @default(true)
+  allowMultiNote   Boolean    @default(true)
+  pushEnabled      Boolean    @default(true)
+  pushPreview      Boolean    @default(false)
+  searchable       Boolean    @default(true)
+  lastActiveAt     DateTime   @default(now())
+  deletedAt        DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  pointAccount        PointAccount?
+  deviceTokens        DeviceToken[]
+  media               Media[]
+  sentNotes           NoteRequest[]      @relation("NoteFrom")
+  receivedNotes       NoteRequest[]      @relation("NoteTo")
+  roomMemberships     ChatRoomMember[]
+  messages            Message[]
+  blocksMade          Block[]            @relation("Blocker")
+  blocksReceived      Block[]            @relation("Blocked")
+  posts               BoardPost[]
+  comments            PostComment[]
+  likes               PostLike[]
+  bookmarks           PostBookmark[]
+  marketItems         MarketItem[]
+  promotions          Promotion[]
+  pointTransactions   PointTransaction[]
+  payments            Payment[]
+  subscriptions       Subscription[]
+  reportsFiled        Report[]           @relation("Reporter")
+  reportsAgainst      Report[]           @relation("ReportedUser")
+  notifications       Notification[]
+  inquiries           Inquiry[]
+  appeals             Appeal[]
+  ownedRooms          ChatRoom[]         @relation("RoomOwner")
+  joinRequests        RoomJoinRequest[]
+  bans                RoomBan[]
+  identityRecords     IdentityVerification[]
+  deletionLogs        AccountDeletionLog[]
+
+  @@index([regionCode, status, lastActiveAt])
+  @@index([status, searchable])
+  @@index([nickname])
+}
+
+model IdentityVerification {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider   String
+  method     String
+  ci         String?
+  di         String?
+  verifiedAt DateTime @default(now())
+  raw        Json?
+
+  @@index([userId])
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         AdminRole @default(SUPPORT)
+  active       Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  auditLogs   AuditLog[]
+  actions     ModerationAction[]
+  reports     Report[]           @relation("ReportAssignee")
+  notices     Notice[]
+}
+
+model Media {
+  id           String    @id @default(cuid())
+  ownerId      String?
+  owner        User?     @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  kind         MediaKind
+  storageKey   String    @unique
+  mime         String
+  size         Int
+  width        Int?
+  height       Int?
+  sha256       String
+  exifRemoved  Boolean   @default(true)
+  isPrivate    Boolean   @default(true)
+  originalName String?
+  createdAt    DateTime  @default(now())
+
+  messages     Message[]
+  postPhotos   BoardPost[]
+  marketItems  MarketItem[]
+  roomImages   ChatRoom[]
+
+  @@index([ownerId])
+}
+
+model NoteRequest {
+  id          String     @id @default(cuid())
+  fromUserId  String
+  fromUser    User       @relation("NoteFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId    String
+  toUser      User       @relation("NoteTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  message     String
+  status      NoteStatus @default(PENDING)
+  roomId      String?
+  createdAt   DateTime   @default(now())
+  respondedAt DateTime?
+  expiresAt   DateTime?
+
+  @@index([toUserId, status])
+  @@index([fromUserId, status])
+  @@index([status, createdAt])
+}
+
+model ChatRoom {
+  id            String         @id @default(cuid())
+  type          RoomType
+  noteKey       String?        @unique
+  title         String
+  description   String?
+  imageMediaId  String?
+  imageMedia    Media?         @relation(fields: [imageMediaId], references: [id])
+  hashtags      String[]       @default([])
+  regionCode    String?
+  region        Region?        @relation(fields: [regionCode], references: [code])
+  capacity      Int?
+  joinApproval  Boolean        @default(false)
+  visibility    RoomVisibility @default(PUBLIC)
+  searchable    Boolean        @default(true)
+  ownerId       String?
+  owner         User?          @relation("RoomOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  status        RoomStatus     @default(ACTIVE)
+  pinnedMessageId String?
+  contextType   String?
+  contextId     String?
+  lastMessageAt DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  members      ChatRoomMember[]
+  messages     Message[]
+  joinRequests RoomJoinRequest[]
+  bans         RoomBan[]
+  posts        BoardPost[]
+
+  @@index([type, regionCode, status])
+  @@index([type, searchable, lastMessageAt])
+  @@index([ownerId])
+}
+
+model ChatRoomMember {
+  id         String     @id @default(cuid())
+  roomId     String
+  room       ChatRoom   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       MemberRole @default(MEMBER)
+  joinedAt   DateTime   @default(now())
+  lastReadAt DateTime?
+  lastReadSeq BigInt    @default(0)
+  muted      Boolean    @default(false)
+  leftAt     DateTime?
+
+  @@unique([roomId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id              String      @id @default(cuid())
+  roomId          String
+  room            ChatRoom    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  senderId        String
+  sender          User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  type            MessageType @default(TEXT)
+  body            String?
+  mediaId         String?
+  media           Media?      @relation(fields: [mediaId], references: [id])
+  clientMessageId String?
+  seq             BigInt      @unique @default(autoincrement())
+  hiddenByAdmin   Boolean     @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime    @default(now())
+
+  @@unique([senderId, clientMessageId])
+  @@index([roomId, seq])
+  @@index([createdAt])
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+model RoomBan {
+  id         String   @id @default(cuid())
+  roomId     String
+  room       ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason     String?
+  rejoinable Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@unique([roomId, userId])
+}
+
+model RoomJoinRequest {
+  id         String            @id @default(cuid())
+  roomId     String
+  room       ChatRoom          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message    String?
+  status     JoinRequestStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  resolvedAt DateTime?
+
+  @@unique([roomId, userId])
+}
+
+model BoardPost {
+  id           String        @id @default(cuid())
+  regionCode   String
+  region       Region        @relation(fields: [regionCode], references: [code])
+  category     BoardCategory
+  authorId     String
+  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  roomId       String?
+  room         ChatRoom?     @relation(fields: [roomId], references: [id])
+  title        String
+  body         String
+  photoMediaId String?
+  photo        Media?        @relation(fields: [photoMediaId], references: [id])
+  likeCount    Int           @default(0)
+  bookmarkCount Int          @default(0)
+  commentCount Int           @default(0)
+  status       BoardStatus   @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  comments  PostComment[]
+  likes     PostLike[]
+  bookmarks PostBookmark[]
+
+  @@index([regionCode, category, status, createdAt])
+  @@index([authorId])
+}
+
+model PostComment {
+  id        String      @id @default(cuid())
+  postId    String
+  post      BoardPost   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
+  status    BoardStatus @default(ACTIVE)
+  createdAt DateTime    @default(now())
+
+  @@index([postId, createdAt])
+}
+
+model PostLike {
+  id        String    @id @default(cuid())
+  postId    String
+  post      BoardPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@unique([postId, userId])
+}
+
+model PostBookmark {
+  id        String    @id @default(cuid())
+  postId    String
+  post      BoardPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@unique([postId, userId])
+}
+
+model MarketItem {
+  id           String       @id @default(cuid())
+  regionCode   String
+  region       Region       @relation(fields: [regionCode], references: [code])
+  type         MarketType
+  title        String
+  description  String
+  price        Int          @default(0)
+  photoMediaId String?
+  photo        Media?       @relation(fields: [photoMediaId], references: [id])
+  status       MarketStatus @default(ON_SALE)
+  sellerId     String
+  seller       User         @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  viewCount    Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([regionCode, status, createdAt])
+  @@index([sellerId])
+}
+
+model Promotion {
+  id          String          @id @default(cuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType  String
+  targetId    String
+  regionCode  String
+  pointCost   Int
+  days        Int
+  status      PromotionStatus @default(PENDING)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  failureCode String?
+  createdAt   DateTime        @default(now())
+
+  @@index([targetType, targetId, status])
+  @@index([status, endsAt])
+}
+
+model PointAccount {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Int      @default(0)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model PointTransaction {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         PointTxType
+  amount       Int
+  balanceAfter Int
+  refType      String?
+  refId        String?
+  memo         String?
+  createdAt    DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@index([refType, refId])
+}
+
+model Payment {
+  id               String          @id @default(cuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform         PaymentPlatform
+  productId        String
+  transactionId    String          @unique
+  purchaseToken    String?
+  points           Int
+  amount           Int
+  currency         String          @default("KRW")
+  status           PaymentStatus   @default(PENDING)
+  raw              Json?
+  verifiedAt       DateTime?
+  refundedAt       DateTime?
+  createdAt        DateTime        @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Subscription {
+  id                    String             @id @default(cuid())
+  userId                String
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform              PaymentPlatform
+  productId             String
+  originalTransactionId String
+  status                SubscriptionStatus @default(ACTIVE)
+  expiresAt             DateTime
+  restoredAt            DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  @@unique([platform, originalTransactionId])
+  @@index([userId])
+}
+
+model Report {
+  id          String           @id @default(cuid())
+  reporterId  String
+  reporter    User             @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetType  ReportTargetType
+  targetId    String
+  targetUserId String?
+  targetUser  User?            @relation("ReportedUser", fields: [targetUserId], references: [id], onDelete: SetNull)
+  reason      ReportReason
+  detail      String?
+  snapshot    Json
+  status      ReportStatus     @default(RECEIVED)
+  assignedTo  String?
+  assignee    AdminUser?       @relation("ReportAssignee", fields: [assignedTo], references: [id])
+  resolution  String?
+  createdAt   DateTime         @default(now())
+  resolvedAt  DateTime?
+
+  actions ModerationAction[]
+  audits  AuditLog[]
+
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@index([targetUserId])
+}
+
+model ModerationAction {
+  id         String               @id @default(cuid())
+  reportId   String?
+  report     Report?              @relation(fields: [reportId], references: [id])
+  adminId    String
+  admin      AdminUser            @relation(fields: [adminId], references: [id])
+  actionType ModerationActionType
+  targetType ReportTargetType
+  targetId   String
+  note       String?
+  createdAt  DateTime             @default(now())
+
+  @@index([reportId])
+  @@index([adminId, createdAt])
+}
+
+model AuditLog {
+  id         String     @id @default(cuid())
+  adminId    String?
+  admin      AdminUser? @relation(fields: [adminId], references: [id])
+  action     String
+  targetType String?
+  targetId   String?
+  reportId   String?
+  report     Report?    @relation(fields: [reportId], references: [id])
+  detail     Json?
+  ip         String?
+  createdAt  DateTime   @default(now())
+
+  @@index([createdAt])
+  @@index([adminId, createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  pushSent  Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+model Notice {
+  id        String     @id @default(cuid())
+  title     String
+  body      String
+  pinned    Boolean    @default(false)
+  published Boolean    @default(true)
+  authorId  String?
+  author    AdminUser? @relation(fields: [authorId], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Inquiry {
+  id         String        @id @default(cuid())
+  userId     String?
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name       String
+  email      String
+  title      String
+  body       String
+  status     InquiryStatus @default(OPEN)
+  answer     String?
+  answeredAt DateTime?
+  createdAt  DateTime      @default(now())
+
+  @@index([status, createdAt])
+}
+
+model AdminSetting {
+  key       String   @id
+  value     Json
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+}
+
+model Appeal {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reportId   String?
+  message    String
+  status     AppealStatus @default(OPEN)
+  response   String?
+  createdAt  DateTime     @default(now())
+  resolvedAt DateTime?
+
+  @@index([status, createdAt])
+}
+
+model AccountDeletionLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  reason    String?
+  removed   Json
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: talktalk
+      POSTGRES_PASSWORD: talktalk_dev_password
+      POSTGRES_DB: tanktalk
+    ports:
+      - "5432:5432"
+    volumes:
+      - talktalk_pg:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U talktalk -d tanktalk"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - talktalk_redis:/data
+
+  api:
+    build:
+      context: ./server
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://talktalk:talktalk_dev_password@postgres:5432/tanktalk?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-32chars}
+      STORAGE_SECRET: ${STORAGE_SECRET:-change-me-storage-secret}
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_DIR: /app/var/storage
+      IDENTITY_PROVIDER: ${IDENTITY_PROVIDER:-dev}
+      IAP_PROVIDER: ${IAP_PROVIDER:-mock}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:4000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-admin@talktalk.eumsoft.co.kr}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-Admin!2345}
+    command: sh -c "npx prisma migrate deploy && npx tsx prisma/seed.ts && node dist/main.js"
+    ports:
+      - "4000:4000"
+    volumes:
+      - talktalk_media:/app/var/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  admin:
+    build:
+      context: ./admin
+    environment:
+      NODE_ENV: production
+      API_BASE_URL: http://api:4000
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  talktalk_pg:
+  talktalk_redis:
+  talktalk_media:

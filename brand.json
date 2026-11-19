@@ -1,0 +1,39 @@
+{
+  "service": {
+    "nameKo": "톡톡 Talk Talk",
+    "nameEn": "Talk Talk",
+    "slug": "talk-talk",
+    "tagline": "동네에서 시작되는 가벼운 대화",
+    "operator": "이음소프트",
+    "operatorEn": "Eumsoft",
+    "supportEmail": "support@talktalk.eumsoft.co.kr",
+    "supportPhone": "033-742-0000",
+    "website": "https://talktalk.eumsoft.co.kr"
+  },
+  "theme": {
+    "primary": "#FF6B4A",
+    "primaryDark": "#E2543A",
+    "secondary": "#2B2D42",
+    "accent": "#FFD166",
+    "background": "#FFF8F5",
+    "surface": "#FFFFFF",
+    "text": "#1F2024",
+    "muted": "#6B6F76"
+  },
+  "icon": {
+    "appIcon": "assets/brand/app_icon.png",
+    "adaptiveForeground": "assets/brand/app_icon_foreground.png",
+    "favicon": "assets/brand/favicon.png"
+  },
+  "legal": {
+    "minimumAge": 19,
+    "termsVersion": "2026-11-01",
+    "privacyVersion": "2026-11-01",
+    "termsUrl": "https://talktalk.eumsoft.co.kr/legal/terms",
+    "privacyUrl": "https://talktalk.eumsoft.co.kr/legal/privacy",
+    "youthPolicyUrl": "https://talktalk.eumsoft.co.kr/legal/youth"
+  },
+  "push": {
+    "defaultPreview": false
+  }
+}

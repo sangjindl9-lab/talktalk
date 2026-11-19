@@ -1,0 +1,45 @@
+{
+  "name": "@talk-talk/server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "톡톡 Talk Talk API/WebSocket 서버 (NestJS + Prisma + PostgreSQL)",
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "prisma generate && nest build",
+    "typecheck": "prisma generate && tsc --noEmit -p tsconfig.json",
+    "start": "node dist/main.js",
+    "start:prod": "node dist/main.js",
+    "prisma:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "test:integration": "tsx test/integration.test.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.1.6",
+    "@nestjs/core": "11.1.6",
+    "@nestjs/platform-express": "11.1.6",
+    "@nestjs/platform-socket.io": "11.1.6",
+    "@nestjs/websockets": "11.1.6",
+    "@prisma/client": "6.19.3",
+    "@socket.io/redis-adapter": "^8.3.0",
+    "ioredis": "5.8.2",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "sharp": "0.34.4",
+    "socket.io": "4.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "11.0.10",
+    "@types/express": "5.0.3",
+    "@types/node": "24.19.2",
+    "prisma": "6.19.3",
+    "socket.io-client": "4.8.1",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}
