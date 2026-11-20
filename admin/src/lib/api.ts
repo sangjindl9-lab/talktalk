@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers';
 
-export const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:4000';
+// Render 내부망 주소(host:port)만 들어오면 http:// 를 붙여 사용
+const RAW_API_BASE = process.env.API_BASE_URL ?? 'http://localhost:4000';
+export const API_BASE = /^https?:\/\//.test(RAW_API_BASE) ? RAW_API_BASE : `http://${RAW_API_BASE}`;
 export const TOKEN_COOKIE = 'tt_admin_token';
 
 export interface ApiResult<T = any> {
