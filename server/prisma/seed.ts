@@ -62,7 +62,11 @@ async function main(): Promise<void> {
     await prisma.adminUser.upsert({
       where: { email: admin.email },
       create: { email: admin.email, name: admin.name, role: admin.role, passwordHash },
-      update: lockDefault ? { name: admin.name, role: admin.role, passwordHash } : { name: admin.name, role: admin.role },
+      // 최고관리자는 ADMIN_BOOTSTRAP_PASSWORD 가 설정돼 있으면 배포 때마다 그 값으로 맞춤
+      update:
+        lockDefault || (admin.role === 'SUPERADMIN' && process.env.ADMIN_BOOTSTRAP_PASSWORD)
+          ? { name: admin.name, role: admin.role, passwordHash }
+          : { name: admin.name, role: admin.role },
     });
   }
   console.log(`[seed] 관리자 ${ADMINS.length}건 (최고관리자: ${ADMINS[0].email})`);
