@@ -55,10 +55,14 @@ async function main(): Promise<void> {
   console.log(`[seed] 지역 ${REGIONS.length}건`);
 
   for (const admin of ADMINS) {
+    // 운영 환경: 소스에 적힌 기본 비밀번호를 쓰는 보조 관리자 계정은 임의 비밀번호로 잠금
+    // (최고관리자가 관리자 웹에서 계정을 새로 발급해 사용)
+    const lockDefault = isProduction && admin.role !== 'SUPERADMIN';
+    const passwordHash = hashPassword(lockDefault ? randomBytes(32).toString('hex') : admin.password);
     await prisma.adminUser.upsert({
       where: { email: admin.email },
-      create: { email: admin.email, name: admin.name, role: admin.role, passwordHash: hashPassword(admin.password) },
-      update: { name: admin.name, role: admin.role },
+      create: { email: admin.email, name: admin.name, role: admin.role, passwordHash },
+      update: lockDefault ? { name: admin.name, role: admin.role, passwordHash } : { name: admin.name, role: admin.role },
     });
   }
   console.log(`[seed] 관리자 ${ADMINS.length}건 (최고관리자: ${ADMINS[0].email})`);
